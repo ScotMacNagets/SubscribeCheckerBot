@@ -5,6 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class RunConfig(BaseModel):
     token: str
 
+class DatabaseConfig(BaseModel):
+    db_url: str
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         case_sensitive=False,
@@ -14,5 +17,6 @@ class Settings(BaseSettings):
     )
 
     run: RunConfig
+    db: DatabaseConfig
 
 settings = Settings()
