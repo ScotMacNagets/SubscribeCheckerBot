@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class ChannelConfig(BaseModel):
+    chan_id: int
+
 class RunConfig(BaseModel):
     token: str
 
@@ -18,5 +21,6 @@ class Settings(BaseSettings):
 
     run: RunConfig
     db: DatabaseConfig
+    channel: ChannelConfig
 
 settings = Settings()
