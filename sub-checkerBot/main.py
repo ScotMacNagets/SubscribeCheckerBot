@@ -1,20 +1,26 @@
 import asyncio
 import logging
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from core.config import settings
+from core.models.db_helper import db_helper
+from middleware import DBMiddleware
 
 bot = Bot(token=settings.run.token)
 dp = Dispatcher()
 
-@dp.message()
-async def echo_message(message: types.Message):
-    await message.answer(text=message.text)
+@dp.startup()
+async def on_startup():
+    await db_helper.create_tables()
+    dp.update.middleware(DBMiddleware(db=db_helper))
 
+@dp.shutdown()
+async def on_shutdown():
+    await db_helper.dispose()
 
 async def main():
+    logging.basicConfig(level=logging.INFO)
     try:
-        logging.basicConfig(level=logging.INFO)
         await dp.start_polling(
             bot,
             skip_updates=True,
