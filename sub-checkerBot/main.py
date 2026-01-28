@@ -9,6 +9,8 @@ from middleware import DBMiddleware
 bot = Bot(token=settings.run.token)
 dp = Dispatcher()
 
+dp.include_router(subscription_router)
+
 @dp.startup()
 async def on_startup():
     await db_helper.create_tables()
