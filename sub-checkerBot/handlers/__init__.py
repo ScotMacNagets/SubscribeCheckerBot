@@ -1,7 +1,9 @@
+from .start import router as start_router
+from .buy_subscription import buy_subscription_router as buy_subscription_router
+
+
 __all__ = (
-    "subscription_router"
+    "start_router",
+    "buy_subscription_router"
 )
-
-
-from .subscription import router as subscription_router
 
