@@ -2,17 +2,16 @@ import asyncio
 import logging
 
 from aiogram import Dispatcher
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.bot_instance import bot
 from core.models.db_helper import db_helper
 from middleware import DBMiddleware
-from handlers import subscription_router
-from services import subscription_checker
+from handlers import start_router, buy_subscription_router
 
 dp = Dispatcher()
 
-dp.include_router(subscription_router)
+dp.include_router(start_router)
+dp.include_router(buy_subscription_router)
 
 @dp.startup()
 async def on_startup():
