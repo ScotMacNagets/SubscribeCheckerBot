@@ -2,6 +2,11 @@ from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class TariffConfig(BaseModel):
+    plan_1: str = "plan_1 месяц"
+    plan_3: str = "plan_3 месяца"
+    plan_6: str  = "plan_6 месяцев"
+
 class ChannelConfig(BaseModel):
     chan_id: int
 
@@ -24,3 +29,4 @@ class Settings(BaseSettings):
     channel: ChannelConfig
 
 settings = Settings()
+tariff = TariffConfig()
