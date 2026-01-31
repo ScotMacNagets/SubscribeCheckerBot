@@ -1,17 +1,26 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-one_month = "1 месяц"
-return_to_start_menu = "назад"
+from keyboards.payment_keyboard import back
+from core.config import tariff
+
 
 def build_tariff_keyboard() -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="1 месяц",
-        callback_data=one_month,
+        text="1 месяц | 299 рублей",
+        callback_data=tariff.plan_1,
+    )
+    builder.button(
+        text="3 месяца | 500 рублей",
+        callback_data=tariff.plan_3,
+    )
+    builder.button(
+        text="💎 6 месяцев | 900 рублей 💎",
+        callback_data=tariff.plan_6,
     )
     builder.button(
         text="Назад",
-        callback_data=return_to_start_menu,
+        callback_data=back,
     )
-    builder.adjust(1)
+    builder.adjust(2,1,1)
     return builder.as_markup()
