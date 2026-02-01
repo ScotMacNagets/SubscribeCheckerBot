@@ -5,8 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
 from core.bot_instance import bot
-from keyboards.start_keyboard import build_start_keyboard, buy_sub
-from keyboards.tariff_keyboard import build_tariff_keyboard
+from keyboards.start_keyboard import build_start_keyboard
 
 
 router = Router()

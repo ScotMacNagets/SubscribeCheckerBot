@@ -1,12 +1,13 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-buy_sub = "buy_subscription"
+from .callback_text import start
 
-def build_start_keyboard()-> InlineKeyboardBuilder:
+
+def build_start_keyboard()-> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="✨Приобрести подписку✨",
-        callback_data=buy_sub,
+        callback_data=start.buy_sub,
     )
     return builder.as_markup()
