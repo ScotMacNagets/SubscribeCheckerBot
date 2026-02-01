@@ -1,8 +1,7 @@
 import asyncio
 import datetime
-from _datetime import timedelta
+from datetime import timedelta
 
-from poetry.console.commands import self
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
