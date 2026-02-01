@@ -5,20 +5,21 @@ from .callback_text import back
 from core.tariff import TARIFFS
 
 
-def build_tariff_keyboard() -> InlineKeyboardBuilder:
+def build_tariff_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(
-        text="1 месяц | 299 рублей",
-        callback_data=tariff.plan_1,
-    )
-    builder.button(
-        text="3 месяца | 500 рублей",
-        callback_data=tariff.plan_3,
-    )
-    builder.button(
-        text="💎 6 месяцев | 900 рублей 💎",
-        callback_data=tariff.plan_6,
-    )
+    for tariff in TARIFFS.values():
+        mouths = tariff.days // 30
+        price_rub = tariff.price // 100
+
+        text = f"{mouths} мес. | {price_rub} ₽"
+        if mouths == 6:
+            text = f"💎 {text} 💎"
+
+        builder.button(
+            text=text,
+            callback_data=tariff.id
+        )
+
     builder.button(
         text="Назад",
         callback_data=back.back,
