@@ -8,12 +8,14 @@ from core.tariff import TARIFFS
 def build_tariff_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for tariff in TARIFFS.values():
-        mouths = tariff.days // 30
+        months = tariff.days // 30
         price_rub = tariff.price // 100
+        hot = tariff.hot
+        emoji = tariff.emoji
 
-        text = f"{mouths} мес. | {price_rub} ₽"
-        if mouths == 6:
-            text = f"💎 {text} 💎"
+        text = f"{months} мес. | {price_rub} ₽"
+        if hot:
+            text = f"{emoji} {text} {emoji}"
 
         builder.button(
             text=text,
