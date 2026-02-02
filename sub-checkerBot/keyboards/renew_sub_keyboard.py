@@ -1,5 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from core.text import RenewKeyboard
 from keyboards.callback_text import Back, Start
 
 
@@ -14,7 +15,7 @@ def build_renew_keyboard(only_back: bool = False):
 
     else:
         builder.button(
-            text="💳 Приобрести подписку",
+            text=RenewKeyboard.BUY_SUBSCRIPTION,
             callback_data=Start.BUY_SUB
         )
 

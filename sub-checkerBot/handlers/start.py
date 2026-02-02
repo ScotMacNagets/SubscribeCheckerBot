@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
 from core.bot_instance import bot
+from core.text import StartHandler
 from keyboards.start_keyboard import build_start_keyboard
 
 
@@ -14,7 +15,7 @@ router = Router()
 @router.message(CommandStart())
 async def start(message: Message):
     await message.answer(
-        text="Приветствую в моем тг боте. Тут ты можешь купить подписку в закрытый тг канал",
+        text=StartHandler.START,
         reply_markup=build_start_keyboard(),
     )
 

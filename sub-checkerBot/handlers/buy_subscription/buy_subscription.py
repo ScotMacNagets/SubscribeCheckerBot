@@ -5,8 +5,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core import constants
 from core.config import settings
 from core.tariff import TARIFFS
+from core.text import TariffHandler, InvoiceHandler, SuccessfulPayment
 from keyboards.payment_keyboard import build_payment_keyboard
 from services.sub_add_and_check import (
     add_or_update_subscription,
@@ -44,14 +46,13 @@ async def tariff_callback(query: CallbackQuery, state: FSMContext):
     tariff = TARIFFS[tariff_id].title
 
     await state.update_data(tariff_id=tariff_id)
-
     await state.set_state(BuySubscription.confirming_payment)
 
+    text = TariffHandler.TARIFF_SELECTED.format(title=tariff)
 
     await query.answer()
     await query.message.edit_text(
-        text=f"Тариф {tariff}\n\n"
-        "Подтвердить оплату?",
+        text=text,
         reply_markup=build_payment_keyboard(),
     ),
 
@@ -69,16 +70,16 @@ async def confirming_payment_callback(query: CallbackQuery, state: FSMContext):
 
     prices = [
         LabeledPrice(
-            label=f"Подписка {tariff.title}",
+            label=InvoiceHandler.INVOICE_LABEL,
             amount=tariff.price
         )
     ]
     await query.message.answer_invoice(
-        title=f"Подписка",
+        title=InvoiceHandler.INVOICE_TITLE,
         description=tariff.title,
         payload=tariff.payload,
         provider_token=str(settings.payment.token),
-        currency="RUB",
+        currency=InvoiceHandler.CURRENCY,
         prices=prices,
     )
 
@@ -116,12 +117,12 @@ async def successful_payment(
 
     if tariff is None:
         logger.error(
-            f"Неизвестный тариф для payload: %s. Доступные тарифы: %s",
+            "Неизвестный тариф для payload: %s. Доступные тарифы: %s",
             payload,
             [t.payload for t in TARIFFS.values()]
 
         )
-        await message.answer("❌ Неизвестный тариф. Обратитесь к поддержке.")
+        await message.answer(SuccessfulPayment.UNKNOWN_TARIFF)
         await state.clear()
         return
 
@@ -129,7 +130,8 @@ async def successful_payment(
     if payment_amount != tariff.price:
         logger.warning(
             "Несоответствие суммы платежа для пользователя %s: "
-            "ожидалось %s, получено %s",
+            "ожидалось %s, получено %s"
+            ,
             user_id,
             tariff.price,
             payment_amount
@@ -150,28 +152,29 @@ async def successful_payment(
 
         # Добавляем пользователя в канал
         channel_added = await add_user_to_channel(user_id)
+        end_date = new_end_date.strftime('%d.%m.%Y')
 
 
         if channel_added:
             # Генерируем инвайт-ссылку для удобства пользователя)
             invite_link = await create_channel_invite_link(user_id=user_id)
             success_message = (
-                f"✅ Оплата прошла успешно!\n\n"
-                f"📋 Тариф: {tariff.title}\n"
-                f"📅 Подписка активна до {new_end_date.strftime('%d.%m.%Y')}\n\n"
-                f"🎉 Доступ к закрытому каналу активирован!"
+                SuccessfulPayment.SUCCESSFUL_INVITE.format(
+                    title=tariff.title,
+                    end_date=end_date,
+                )
             )
 
             if invite_link:
-                success_message += f"\n\n🔗 Ссылка на канал: {invite_link}\n(действует 24 часа)"
+                success_message += SuccessfulPayment.INVITE_LINK.format(invite_link=invite_link)
         else:
             success_message = (
-                f"✅ Оплата прошла успешно!\n\n"
-                f"📋 Тариф: {tariff.title}\n"
-                f"📅 Подписка активна до {new_end_date.strftime('%d.%m.%Y')}\n\n"
-                f"⚠️ Не удалось автоматически добавить вас в канал. "
-                f"Обратитесь к <a href='https://t.me/{settings.admin.support}'>администратору</a> " 
-                f"для получения доступа."
+                SuccessfulPayment.UNSUCCESSFUL_INVITE.format(
+                    title=tariff.title,
+                    end_date=end_date,
+                    admin_username=settings.admin.support,
+                )
+
             )
 
         await message.answer(success_message, parse_mode="HTML")
@@ -185,8 +188,9 @@ async def successful_payment(
             exc_info=True
         )
         await message.answer(
-            "❌ Произошла ошибка при активации подписки. "
-            "Ваш платеж зарегистрирован. Обратитесь к <a href='https://t.me/{settings.admin.support}>поддержке.</a>",
+            SuccessfulPayment.ACTIVATE_ERROR.format(
+                admin_username=settings.admin.support,
+            ),
             parse_mode="HTML",
         )
         await state.clear()
