@@ -36,7 +36,7 @@ async def buy_sub_callback(query: CallbackQuery, state: FSMContext):
 
 @router.callback_query(
     BuySubscription.choosing_tariff,
-    F.data.startswith("plan_"),
+    F.data.startswith(constants.TARIFF_CALLBACK_PREFIX),
 )
 async def tariff_callback(query: CallbackQuery, state: FSMContext):
     """
