@@ -1,15 +1,13 @@
-from pydantic import BaseModel
 
-class BackText:
-    back: str = "back"
 
-class PaymentText:
-    confirm_pay: str = "confirm payment"
-    cancel_pay: str = "cancel payment"
+class Back:
+    BACK = "back"
+    CHECK_BACK = "check_back"
 
-class StartText:
-    buy_sub: str = "buy_subscription"
+class Payment:
+    CONFIRM_PAY = "confirm payment"
+    CANCEL_PAY = "cancel payment"
 
-payment = PaymentText()
-start = StartText()
-back = BackText()
+class Start:
+    BUY_SUB = "buy_subscription"
+    CHECK_SUB = "check_subscription"

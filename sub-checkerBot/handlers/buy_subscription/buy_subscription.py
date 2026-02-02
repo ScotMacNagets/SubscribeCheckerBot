@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
@@ -20,8 +22,7 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 
-
-@router.callback_query(F.data == start.buy_sub)
+@router.callback_query(F.data == Start.BUY_SUB)
 async def buy_sub_callback(query: CallbackQuery, state: FSMContext):
     await state.set_state(BuySubscription.choosing_tariff)
     await query.answer()
@@ -57,7 +58,7 @@ async def tariff_callback(query: CallbackQuery, state: FSMContext):
 
 @router.callback_query(
     BuySubscription.confirming_payment,
-    F.data == payment.confirm_pay,
+    F.data == Payment.CONFIRM_PAY,
 )
 async def confirming_payment_callback(query: CallbackQuery, state: FSMContext):
     # Генерируем счет для пользователя в соотвествии с тарифом
@@ -192,7 +193,7 @@ async def successful_payment(
 
 
 
-@router.callback_query((F.data == payment.cancel_pay))
+@router.callback_query(F.data == Payment.CANCEL_PAY)
 async def to_main_menu(query: CallbackQuery, state: FSMContext):
     await state.clear()
     await query.answer()
@@ -202,7 +203,7 @@ async def to_main_menu(query: CallbackQuery, state: FSMContext):
     )
 
 
-@router.callback_query(F.data == back.back)
+@router.callback_query(F.data == Back.BACK)
 async def go_back(query: CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
 

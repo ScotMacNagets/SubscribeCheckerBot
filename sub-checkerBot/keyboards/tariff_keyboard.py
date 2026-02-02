@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from .callback_text import back
+from .callback_text import Back
 from core.tariff import TARIFFS
 
 
@@ -22,7 +22,7 @@ def build_tariff_keyboard() -> InlineKeyboardMarkup:
 
     builder.button(
         text="Назад",
-        callback_data=back.back,
+        callback_data=Back.BACK,
     )
     builder.adjust(2,1,1)
     return builder.as_markup()
