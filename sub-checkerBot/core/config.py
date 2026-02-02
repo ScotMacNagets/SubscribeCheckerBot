@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+class AdminConfig(BaseModel):
+    support: str
 
-class TariffConfig(BaseModel):
-    plan_1: str = "plan_1 месяц"
-    plan_3: str = "plan_3 месяца"
-    plan_6: str  = "plan_6 месяцев"
+class PaymentConfig(BaseModel):
+    token: str
 
 class ChannelConfig(BaseModel):
     chan_id: int
@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     run: RunConfig
     db: DatabaseConfig
     channel: ChannelConfig
+    payment: PaymentConfig
+    admin: AdminConfig
 
 settings = Settings()
-tariff = TariffConfig()
