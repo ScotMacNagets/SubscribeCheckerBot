@@ -14,7 +14,13 @@ from core.models.db_helper import DatabaseHelper
 logger = logging.getLogger(__name__)
 
 
-async def add_or_update_subscription(session: AsyncSession, user_id: int, days: int = 3):
+async def add_or_update_subscription(
+        session: AsyncSession,
+        user_id: int,
+        username: str,
+        days: int = 3,
+
+):
     #Добавляет или продлевает подписку
     now = datetime.datetime.now().date()
 
@@ -24,7 +30,9 @@ async def add_or_update_subscription(session: AsyncSession, user_id: int, days: 
     if not user:
         user = User(
             id=user_id,
-            subscription_end=now + datetime.timedelta(days=days)
+            subscription_end=now + datetime.timedelta(days=days),
+            username=username,
+
         )
         session.add(user)
     else:

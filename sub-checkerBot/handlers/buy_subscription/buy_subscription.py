@@ -53,7 +53,7 @@ async def tariff_callback(query: CallbackQuery, state: FSMContext):
     await query.answer()
     await query.message.edit_text(
         text=text,
-        reply_markup=build_payment_keyboard(),
+        reply_markup=build_payment_keyboard()
     ),
 
 
@@ -142,6 +142,7 @@ async def successful_payment(
         new_end_date = await add_or_update_subscription(
             session=session,
             user_id=user_id,
+            username=message.from_user.username,
             days=tariff.days,
         )
         logger.info(
