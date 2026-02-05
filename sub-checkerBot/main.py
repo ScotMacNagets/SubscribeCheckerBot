@@ -7,7 +7,7 @@ from core.bot_instance import bot
 from core.logging_config import configure_logging
 from core.models.db_helper import db_helper
 from middleware import DBMiddleware
-from handlers import start_router, buy_subscription_router, check_sub_router
+from handlers import start_router, buy_subscription_router, check_sub_router, admin_router
 from services.sub_add_and_check import subscription_checker
 
 
@@ -18,6 +18,7 @@ dp = Dispatcher()
 dp.include_router(start_router)
 dp.include_router(buy_subscription_router)
 dp.include_router(check_sub_router)
+dp.include_router(admin_router)
 
 @dp.startup()
 async def on_startup():
