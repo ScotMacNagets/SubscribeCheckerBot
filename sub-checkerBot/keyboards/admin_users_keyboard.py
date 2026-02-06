@@ -1,7 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from .admin_callback_text import AdminUsers, AdminUserActions
+from callbacks.admin_callback_text import AdminUsers, AdminUserActions
+from callbacks.admin_user import AdminUserCB
 
 
 def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
@@ -18,34 +19,40 @@ def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def build_user_actions_keyboard(username) -> InlineKeyboardMarkup:
+def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
     """
     Клавиатура действий над конкретным пользователем.
     """
     builder = InlineKeyboardBuilder()
-    builder.button(
-        text="➕ +7 дней",
-        callback_data=f"{AdminUserActions.EXTEND_7}:{username}",
-    )
-    builder.button(
-        text="➕ +30 дней",
-        callback_data=f"{AdminUserActions.EXTEND_30}:{username}",
-    )
-    builder.button(
-        text="➕ +90 дней",
-        callback_data=f"{AdminUserActions.EXTEND_90}:{username}",
-    )
+    for days in (7, 30, 90):
+        builder.button(
+            text=f"➕ +{days} дней",
+            callback_data=AdminUserCB(
+                action=AdminUserActions.EXTEND,
+                username=username,
+                days=days,
+            ).pack()
+        )
     builder.button(
         text="📅 Установить дату",
-        callback_data=f"{AdminUserActions.SET_END_DATE}:{username}",
+        callback_data=AdminUserCB(
+            action=AdminUserActions.SET_END_DATE,
+            username=username,
+        ).pack()
     )
     builder.button(
         text="✂ Отменить подписку",
-        callback_data=f"{AdminUserActions.CANCEL_SUB}:{username}",
+        callback_data=AdminUserCB(
+            action=AdminUserActions.CANCEL_SUB,
+            username=username,
+        ).pack()
     )
     builder.button(
         text="🗑 Удалить пользователя",
-        callback_data=f"{AdminUserActions.DELETE_USER}:{username}",
+        callback_data=AdminUserCB(
+            action=AdminUserActions.DELETE_USER,
+            username=username,
+        ).pack()
     )
     builder.button(
         text="⬅ В админ-меню",
