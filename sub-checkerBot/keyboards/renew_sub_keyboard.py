@@ -1,7 +1,7 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from core.text import RenewKeyboard
-from keyboards.callback_text import Back, Start
+from callbacks.callback_text import Back, Start
 
 
 def build_renew_keyboard(only_back: bool = False):

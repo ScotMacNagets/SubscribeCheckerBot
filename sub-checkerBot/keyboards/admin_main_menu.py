@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from keyboards.admin_callback_text import AdminUsers
+from callbacks.admin_callback_text import AdminUsers
 
 
 def build_main_menu() -> InlineKeyboardMarkup:

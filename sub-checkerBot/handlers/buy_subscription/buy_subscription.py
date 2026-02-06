@@ -17,7 +17,7 @@ from services.sub_add_and_check import (
 )
 from handlers.helpers import show_menu
 from .states import BuySubscription
-from keyboards.callback_text import Start, Payment, Back
+from callbacks.callback_text import Start, Payment, Back
 
 logger = logging.getLogger(__name__)
 

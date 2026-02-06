@@ -1,13 +1,12 @@
 from datetime import date
 
 from aiogram import Router, F
-from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from handlers.check_subscription.messages import self_check_text
 from handlers.helpers import show_menu
-from keyboards.callback_text import Start, Back
+from callbacks.callback_text import Start, Back
 from keyboards.renew_sub_keyboard import build_renew_keyboard
 from services.user_check_sub import self_check
 

@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from core.text import PaymentKeyboard
-from .callback_text import Payment, Back
+from callbacks.callback_text import Payment, Back
 
 
 def build_payment_keyboard() -> InlineKeyboardMarkup:

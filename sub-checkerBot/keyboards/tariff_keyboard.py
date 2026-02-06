@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from .callback_text import Back
+from callbacks.callback_text import Back
 from core.tariff import TARIFFS
 
 

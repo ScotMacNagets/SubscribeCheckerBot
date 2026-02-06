@@ -1,8 +1,8 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from core.text import StartKeyboard
-from .callback_text import Start
+from callbacks.callback_text import Start
 
 
 def build_start_keyboard()-> InlineKeyboardMarkup:
