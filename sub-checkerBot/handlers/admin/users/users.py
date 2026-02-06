@@ -7,13 +7,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from handlers.admin.users.helpers import _format_user_detail, get_user_and_days
+from callbacks.admin_user import AdminUserCB
+from handlers.admin.users.helpers import get_user_and_days, render_user
 from handlers.admin.users.users_states import AdminUserStates
-from keyboards.admin_callback_text import AdminUsers, AdminUserActions
-from keyboards.admin_users_keyboard import (
-    build_admin_main_users_keyboard,
-    build_user_actions_keyboard,
-)
+from callbacks.admin_callback_text import AdminUsers, AdminUserActions
+from keyboards.admin_users_keyboard import build_admin_main_users_keyboard
 from services import admin_users as admin_users_service
 
 
@@ -53,19 +51,12 @@ async def handle_user_search_by_id(
 
     user = await admin_users_service.get_user_by_username(session=session, username=username)
 
-    if not user:
-        await message.answer(
-            text=f"Пользователь с username {username} не найден.",
-            reply_markup=build_admin_main_users_keyboard(),
-        )
-        await state.clear()
-        return
 
-    text = _format_user_detail(user)
-    await message.answer(
-        text=text,
-        reply_markup=build_user_actions_keyboard(username=username),
-        parse_mode="HTML",
+    await render_user(
+        user=user,
+        username=username,
+        target=message,
+        reply_markup=build_admin_main_users_keyboard(),
     )
     await state.clear()
 
@@ -100,17 +91,12 @@ async def extend_7_days(
     )
     await query.answer()
 
-    if not user:
-        await query.message.edit_text(
-            text="Пользователь не найден.",
-            reply_markup=build_admin_main_users_keyboard(),
-        )
-        return
-
-    text = _format_user_detail(user)
-    await query.message.edit_text(
-        text=text,
-        parse_mode="HTML",
+    await render_user(
+        user=user,
+        username=callback_data.username,
+        target=query,
+        is_callback=True,
+        reply_markup=build_admin_main_users_keyboard(),
     )
 
 
@@ -131,18 +117,13 @@ async def cancel_subscription(
     )
     await query.answer()
 
-    if not user:
-        await query.message.edit_text(
-            text="Пользователь не найден.",
-            reply_markup=build_admin_main_users_keyboard(),
-        )
-        return
 
-    text = _format_user_detail(user)
-    await query.message.edit_text(
-        text=text,
-        reply_markup=build_user_actions_keyboard(username=username),
-        parse_mode="HTML",
+    await render_user(
+        user=user,
+        username=callback_data.username,
+        target=query,
+        is_callback=True,
+        reply_markup=build_admin_main_users_keyboard(),
     )
 
 
@@ -166,7 +147,7 @@ async def ask_new_end_date(
     await query.answer()
     await query.message.edit_text(
         text=(
-            f"Введите новую дату окончания подписки для пользователя {username} "
+            f"Введите новую дату окончания подписки для пользователя {callback_data.username} "
             "в формате ДД.ММ.ГГГГ.\n"
             "Например: 25.12.2026\n"
         )
@@ -207,18 +188,12 @@ async def handle_new_end_date(
 
     await state.clear()
 
-    if not user:
-        await message.answer(
-            text="Пользователь не найден.",
-            reply_markup=build_admin_main_users_keyboard(),
-        )
-        return
 
-    text = _format_user_detail(user)
-    await message.answer(
-        text=text,
-        reply_markup=build_user_actions_keyboard(username=username),
-        parse_mode="HTML",
+    await render_user(
+        user=user,
+        username=username,
+        target=message,
+        reply_markup=build_admin_main_users_keyboard(),
     )
 
 
@@ -241,9 +216,12 @@ async def delete_user(
         )
         return
 
-    await query.message.edit_text(
-        text=f"Пользователь с username {username} удалён из базы данных.",
-        reply_markup=build_admin_main_users_keyboard(),
+    await render_user(
+        username=username,
+        target=query,
+        is_callback=True,
+        short=True,
+        reply_markup=build_admin_main_users_keyboard()
     )
 
 
