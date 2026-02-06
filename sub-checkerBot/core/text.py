@@ -73,5 +73,13 @@ class PaymentKeyboard:
     PAY="💳 Оплатить"
     CANCEL_PAYMENT="⛔ Отменить оплату"
 
+#admin_users_keyboard
+class AdminUsersKeyboard:
+    EXTEND_DAYS="➕ +{days} дней"
+    SET_THE_DATE="📅 Установить дату"
+    CANCEL_SUB="✂ Отменить подписку"
+    DELETE_USER="🗑 Удалить пользователя"
+    BACK_TO_ADMIN_MENU="⬅ В админ-меню"
+
 
 

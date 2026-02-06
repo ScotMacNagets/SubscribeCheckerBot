@@ -3,6 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from callbacks.admin_callback_text import AdminUsers, AdminUserActions
 from callbacks.admin_user import AdminUserCB
+from core.text import AdminUsersKeyboard
 
 
 def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
@@ -26,7 +27,7 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for days in (7, 30, 90):
         builder.button(
-            text=f"➕ +{days} дней",
+            text=AdminUsersKeyboard.EXTEND_DAYS.format(days=days),
             callback_data=AdminUserCB(
                 action=AdminUserActions.EXTEND,
                 username=username,
@@ -34,28 +35,28 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
             ).pack()
         )
     builder.button(
-        text="📅 Установить дату",
+        text=AdminUsersKeyboard.SET_THE_DATE,
         callback_data=AdminUserCB(
             action=AdminUserActions.SET_END_DATE,
             username=username,
         ).pack()
     )
     builder.button(
-        text="✂ Отменить подписку",
+        text=AdminUsersKeyboard.CANCEL_SUB,
         callback_data=AdminUserCB(
             action=AdminUserActions.CANCEL_SUB,
             username=username,
         ).pack()
     )
     builder.button(
-        text="🗑 Удалить пользователя",
+        text=AdminUsersKeyboard.DELETE_USER,
         callback_data=AdminUserCB(
             action=AdminUserActions.DELETE_USER,
             username=username,
         ).pack()
     )
     builder.button(
-        text="⬅ В админ-меню",
+        text=AdminUsersKeyboard.BACK_TO_ADMIN_MENU,
         callback_data=AdminUserActions.BACK_TO_ADMIN_MENU,
     )
     builder.adjust(3, 2, 1)
