@@ -61,35 +61,24 @@ async def handle_user_search_by_id(
     await state.clear()
 
 
-def _parse_user_id_from_callback(data: str) -> int | None:
-    """
-    Ожидаемый формат: "<action>:<user_id>".
-    """
-    try:
-        _, raw_id = data.split(":", maxsplit=1)
-        return int(raw_id)
-    except (ValueError, IndexError):
-        return None
-
-
-@router.callback_query(F.data.startswith("extend_"))
-async def extend_7_days(
+@router.callback_query(AdminUserCB.filter(F.action == AdminUserActions.EXTEND))
+async def extend_sub_for_user(
     query: CallbackQuery,
+    callback_data: AdminUserCB,
     session: AsyncSession,
 ):
-    days, username = get_user_and_days(query=query)
-    days = int(days)
+    # days, username = get_user_and_days(query=query)
+    # days = int(days)
 
-    if username is None:
+    if not callback_data.username or not callback_data.days:
         await query.answer("Некорректные данные.", show_alert=True)
         return
 
     user = await admin_users_service.extend_subscription(
         session=session,
-        username=username,
-        days=days,
+        username=callback_data.username,
+        days=callback_data.days,
     )
-    await query.answer()
 
     await render_user(
         user=user,
@@ -100,22 +89,22 @@ async def extend_7_days(
     )
 
 
-@router.callback_query(F.data.startswith("admin_user_cancel_sub"))
+@router.callback_query(AdminUserCB.filter(F.action == AdminUserActions.CANCEL_SUB))
 async def cancel_subscription(
     query: CallbackQuery,
+    callback_data: AdminUserCB,
     session: AsyncSession,
 ):
-    _, username = query.data.split(":")
-    if username is None:
+
+    if not callback_data.username:
         await query.answer("Некорректные данные.", show_alert=True)
         return
 
     user = await admin_users_service.set_subscription_end(
         session=session,
-        username=username,
+        username=callback_data.username,
         cancel=True,
     )
-    await query.answer()
 
 
     await render_user(
@@ -127,21 +116,18 @@ async def cancel_subscription(
     )
 
 
-@router.callback_query(F.data.startswith("admin_user_set_end"))
+@router.callback_query(AdminUserCB.filter(F.action == AdminUserActions.SET_END_DATE))
 async def ask_new_end_date(
     query: CallbackQuery,
+    callback_data: AdminUserCB,
     state: FSMContext,
 ):
-    """
-    Запрос новой даты окончания подписки в формате ДД.ММ.ГГГГ.
-    """
 
-    _, username = query.data.split(":")
-    if username is None:
+    if not callback_data.username:
         await query.answer("Некорректные данные.", show_alert=True)
         return
 
-    await state.update_data(target_username=username)
+    await state.update_data(target_username=callback_data.username)
     await state.set_state(AdminUserStates.SET_END_DATE)
 
     await query.answer()
@@ -197,12 +183,13 @@ async def handle_new_end_date(
     )
 
 
-@router.callback_query(F.data.startswith("admin_user_delete"))
+@router.callback_query(AdminUserCB.filter(F.action == AdminUserActions.DELETE_USER))
 async def delete_user(
     query: CallbackQuery,
+    callback_data: AdminUserCB,
     session: AsyncSession,
 ):
-    _, username = query.data.split(":")
+    username = callback_data.username
     deleted = await admin_users_service.delete_user(
         session=session,
         username=username,
@@ -225,7 +212,7 @@ async def delete_user(
     )
 
 
-@router.callback_query(F.data.startswith("admin_back_main"))
+@router.callback_query(AdminUserCB.filter(F.action == AdminUsers.SEARCH_BY_USERNAME))
 async def back_to_admin_menu(query: CallbackQuery):
     await query.answer()
     await query.message.edit_text(
