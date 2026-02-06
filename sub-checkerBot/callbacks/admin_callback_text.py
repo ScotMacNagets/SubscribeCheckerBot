@@ -9,9 +9,7 @@ class AdminUsers:
 
 
 class AdminUserActions:
-    EXTEND_7 = "extend_7"
-    EXTEND_30 = "extend_30"
-    EXTEND_90 = "extend_90"
+    EXTEND = "admin_user_extend"
     SET_END_DATE = "admin_user_set_end"
     CANCEL_SUB = "admin_user_cancel_sub"
     DELETE_USER = "admin_user_delete"
