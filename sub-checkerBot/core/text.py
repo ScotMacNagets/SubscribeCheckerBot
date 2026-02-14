@@ -59,6 +59,10 @@ class CheckSubHandlers:
 
 #ADMIN
 
+#Main
+class AdminMenu:
+    MENU="Добро пожаловь в меню администратора🔧\n Выберете, что хотите сделать:"
+
 #Users
 class AdminUsersMenu:
     USER_MANAGE_MENU="Меню управления юзерами"
@@ -90,6 +94,10 @@ class AdminUsersHelpersText:
 
 
 #Tariff
+
+class AdminTariffMenu:
+    MENU="Меню управления тарифами📈"
+
 
 class AdminAllTariffText:
     TARIFF_DETAILED_LINE=(
@@ -126,7 +134,25 @@ class AdminUsersKeyboard:
     CANCEL_SUB="✂ Отменить подписку"
     DELETE_USER="🗑 Удалить пользователя"
     BACK_TO_ADMIN_MENU="⬅ В админ-меню"
-    USERNAME_SEARCH="🔍 Поиск по нику"
+    USERNAME_SEARCH="📂🔍 Поиск по нику"
+
+#admin_tariffs_keyboard
+
+class AdminTariffKeyboard:
+    #List
+    ACTIVE_STATUS="🟢"
+    NON_ACTIVE_STATUS="⚪️"
+    TARIFF_LIST_TEXT="{status} {title} — {price}₽"
+
+    #Detailed_keyboard
+    ACTIVE="✅ Активен"
+    NON_ACTIVE="🚫 Неактивен"
+
+    HOT="🔥 Горячий"
+    NOT_HOT="💤 Обычный"
+
+    DELETE="🗑 Удалить"
+    BACK_TO_THE_LIST="⬅ К списку тарифов"
 
 
 
