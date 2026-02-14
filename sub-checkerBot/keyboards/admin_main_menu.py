@@ -9,7 +9,7 @@ def build_main_menu() -> InlineKeyboardMarkup:
 
     builder.button(
         text="Управление пользователями",
-        callback_data=AdminUsers.HUMAN_RESOURCE
+        callback_data=AdminUsers.HUMAN_RESOURCE,
     )
     builder.button(
         text="Управление тарифами",
