@@ -11,6 +11,6 @@ router = Router()
 async def open_admin_menu(message: Message):
 
     await message.answer(
-        text="Меню администратора",
+        text=AdminMenu.MENU,
         reply_markup=build_main_menu(),
     )
