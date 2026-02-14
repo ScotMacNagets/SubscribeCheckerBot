@@ -102,11 +102,9 @@ class AdminTariffMenu:
 class AdminAllTariffText:
     TARIFF_DETAILED_LINE=(
         "📦 <b>Тариф</b>\n"
-        "ID: <code>{id}</code>\n"
         "Название: {title}\n"
         "Дней доступа: {days}\n"
         "Цена: {price}₽\n"
-        "Payload: <code>{payload}</code>\n"
         "Горячий: {hot}\n"
         "Активен: {is_active}"
     )
