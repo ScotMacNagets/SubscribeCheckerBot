@@ -17,11 +17,21 @@ def build_admin_tariffs_list_keyboard(tariffs: Sequence[Tariff]) -> InlineKeyboa
     builder = InlineKeyboardBuilder()
 
     for tariff in tariffs:
-        status = "🟢" if tariff.is_active else "⚪️"
-        text = f"{status} {tariff.title} — {tariff.price}₽"
+        status = (
+            AdminTariffKeyboard.ACTIVE_STATUS
+            if tariff.is_active
+            else AdminTariffKeyboard.NON_ACTIVE_STATUS
+        )
+
+        text = AdminTariffKeyboard.TARIFF_LIST_TEXT.format(
+            status=status,
+            title=tariff.title,
+            price=tariff.price,
+        )
+
         builder.button(
             text=text,
-            callback_data=AdminTariffCB(action="detail", tariff_id=tariff.id).pack(),
+            callback_data=AdminTariffCB(action=AdminTariffsActions.DETAIL, tariff_id=tariff.id).pack(),
         )
 
     builder.button(
@@ -40,30 +50,36 @@ def build_admin_tariff_detail_keyboard(tariff: Tariff) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.button(
-        text="✅ Активен" if tariff.is_active else "🚫 Неактивен",
+        text= AdminTariffKeyboard.ACTIVE
+        if tariff.is_active
+        else AdminTariffKeyboard.NON_ACTIVE,
+
         callback_data=AdminTariffCB(
-            action="toggle_active",
+            action=AdminTariffsActions.TOGGLE_ACTIVE,
             tariff_id=tariff.id,
         ).pack(),
     )
     builder.button(
-        text="🔥 Горячий" if tariff.hot else "💤 Обычный",
+        text= AdminTariffKeyboard.HOT
+        if tariff.hot
+        else AdminTariffKeyboard.NOT_HOT,
+
         callback_data=AdminTariffCB(
-            action="toggle_hot",
+            action=AdminTariffsActions.TOGGLE_HOT,
             tariff_id=tariff.id,
         ).pack(),
     )
     builder.button(
-        text="🗑 Удалить",
+        text=AdminTariffKeyboard.DELETE,
         callback_data=AdminTariffCB(
-            action="delete",
+            action=AdminTariffsActions.DELETE,
             tariff_id=tariff.id,
         ).pack(),
     )
     builder.button(
-        text="⬅ К списку тарифов",
+        text=AdminTariffKeyboard.BACK_TO_THE_LIST,
         callback_data=AdminTariffCB(
-            action="back_to_list",
+            action=AdminTariffsActions.BACK_TO_THE_LIST,
             tariff_id=None,
         ).pack(),
     )
