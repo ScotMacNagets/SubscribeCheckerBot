@@ -15,3 +15,7 @@ class AdminUserActions:
     DELETE_USER = "admin_user_delete"
     BACK_TO_ADMIN_MENU = "admin_back_main"
 
+
+class AdminTariffs:
+    TARIFFS_MENU = "admin_tariffs_menu"
+    BACK_TO_ADMIN_MENU = "admin_tariffs_back_main"

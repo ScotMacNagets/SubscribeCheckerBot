@@ -11,5 +11,9 @@ def build_main_menu() -> InlineKeyboardMarkup:
         text="Управление пользователями",
         callback_data=AdminUsers.HUMAN_RESOURCE
     )
+    builder.button(
+        text="Управление тарифами",
+        callback_data=AdminTariffs.TARIFFS_MENU,
+    )
 
     return builder.as_markup()
