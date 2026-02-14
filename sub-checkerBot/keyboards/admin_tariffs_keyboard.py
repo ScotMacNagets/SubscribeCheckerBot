@@ -3,9 +3,10 @@ from collections.abc import Sequence
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from callbacks.admin_callback_text import AdminTariffs
+from callbacks.admin_callback_text import AdminTariffs, AdminTariffsActions
 from callbacks.admin_tariff_callbackdata import AdminTariffCB
 from core.models.tariff import Tariff
+from core.text import AdminTariffKeyboard
 
 
 def build_admin_tariffs_list_keyboard(tariffs: Sequence[Tariff]) -> InlineKeyboardMarkup:

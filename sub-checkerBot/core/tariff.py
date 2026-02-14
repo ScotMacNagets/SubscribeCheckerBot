@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models.tariff import Tariff
+from core.text import AdminTariffMenu
 from keyboards.admin_tariffs_keyboard import build_admin_tariffs_list_keyboard
 
 
@@ -37,7 +38,7 @@ async def get_tariff_by_field(
 async def render_tariffs_list(
         query: CallbackQuery,
         session: AsyncSession,
-        text: str = "Меню управления тарифами"
+        text: str = AdminTariffMenu.MENU,
 ):
     tariffs = await get_all_tariffs(session=session)
     keyboard = build_admin_tariffs_list_keyboard(tariffs=tariffs)

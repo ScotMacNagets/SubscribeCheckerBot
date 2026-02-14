@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_user_callbackdata import AdminUserCB
 from core.text import AdminUsersMenu, AdminUserAction
-from handlers.admin.users.helpers import get_user_and_days, render_user
+from keyboards.admin_main_menu import build_main_menu
+from services.admin_users import render_user
 from handlers.admin.users.users_states import AdminUserStates
 from callbacks.admin_callback_text import AdminUsers, AdminUserActions
 from keyboards.admin_users_keyboard import build_admin_main_users_keyboard
@@ -204,10 +205,20 @@ async def delete_user(
     )
 
 
-@router.callback_query(F.data == AdminUserActions.BACK_TO_ADMIN_MENU)
+@router.callback_query(F.data == AdminUserActions.BACK_TO_USERS_ADMIN_MENU)
 async def back_to_admin_menu(query: CallbackQuery):
     await query.answer()
     await query.message.edit_text(
         text=AdminUserAction.BACK_TO_USERS_ADMIN_MENU,
         reply_markup=build_admin_main_users_keyboard(),
+    )
+
+@router.callback_query(F.data == AdminUserActions.BACK_TO_ADMIN_MENU)
+async def back_to_admin_menu(
+    query: CallbackQuery,
+):
+    await query.answer()
+    await query.message.edit_text(
+        text="Меню администратора",
+        reply_markup=build_main_menu(),
     )

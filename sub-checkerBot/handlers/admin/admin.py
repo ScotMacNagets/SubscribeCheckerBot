@@ -2,6 +2,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
+from core.text import AdminMenu
 from keyboards.admin_main_menu import build_main_menu
 
 router = Router()

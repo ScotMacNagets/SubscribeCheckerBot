@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from handlers.check_subscription.messages import self_check_text
+from handlers.check_subscription.helpers import self_check_text
 from handlers.helpers import show_menu
 from callbacks.callback_text import Start, Back
 from keyboards.renew_sub_keyboard import build_renew_keyboard
