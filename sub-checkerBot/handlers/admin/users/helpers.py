@@ -3,6 +3,7 @@ from datetime import date
 from aiogram.types import CallbackQuery, Message
 
 from core.models import User
+from core.text import AdminUsersHelpersText
 from keyboards.admin_users_keyboard import build_user_actions_keyboard
 
 
@@ -11,12 +12,13 @@ def _format_user_short(user: User) -> str:
     if user.subscription_end:
         days_left = (user.subscription_end - date.today()).days
         status = (
-            f"активна, до {user.subscription_end.strftime('%d.%m.%Y')} ({days_left} дн.)"
-            if days_left >= 0
-            else f"истекла {user.subscription_end.strftime('%d.%m.%Y')} ({abs(days_left)} дн. назад)"
+            AdminUsersHelpersText.FORMAT_SHORT.format(
+                date=user.subscription_end.strftime('%d.%m.%Y'),
+                days_left=abs(days_left),
+            ),
         )
     else:
-        status = "нет подписки"
+        status = "🔴 нет подписки"
 
     username = f"@{user.username}" if user.username else "-"
     return f"ID: {user.id} | {username} | {status}"
@@ -24,18 +26,19 @@ def _format_user_short(user: User) -> str:
 
 def _format_user_detail(user: User) -> str:
     lines = [
-        f"👤 <b>Пользователь</b>",
-        f"ID: <code>{user.id}</code>",
-        f"Username: @{user.username}" if user.username else "Username: -",
-        f"Создан: {user.created_at.strftime('%d.%m.%Y %H:%M:%S')}",
+        AdminUsersHelpersText.FORMAT_DETAIL.format(
+            id=user.id,
+            username=user.username,
+            date=user.created_at.strftime('%d.%m.%Y')
+        ),
     ]
 
     if user.subscription_end:
         days_left = (user.subscription_end - date.today()).days
-        status = "активна" if days_left >= 0 else "истекла"
+        status = "🟢 активна" if days_left >= 0 else "🔴 истекла"
         lines.append(
             f"Подписка: {status}, до {user.subscription_end.strftime('%d.%m.%Y')} (дней: {days_left})"
-        )
+        ),
     else:
         lines.append("Подписка: отсутствует")
 
@@ -53,17 +56,17 @@ async def render_user(
     if not user:
         if is_callback:
             await target.message.edit_text(
-                text="Пользователь не найден",
+                text=AdminUsersHelpersText.USER_NOT_FOUND,
                 reply_markup=reply_markup,
             )
         else:
             await target.answer(
-                text="Пользователь не найден",
+                text=AdminUsersHelpersText.USER_NOT_FOUND,
                 reply_markup=reply_markup,
             )
         if delete:
             await target.message.edit_text(
-                text="Пользователь успешно удален",
+                text=AdminUsersHelpersText.USER_SUCCESSFULLY_DELETED,
                 reply_markup=reply_markup,
             )
         return
@@ -78,7 +81,7 @@ async def render_user(
     else:
         method = target.answer
 
-    if is_callback and target == CallbackQuery:
+    if is_callback and isinstance(target, CallbackQuery):
         await target.answer()
 
     await method(

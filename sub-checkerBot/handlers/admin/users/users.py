@@ -7,7 +7,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from callbacks.admin_user import AdminUserCB
+from callbacks.admin_user_callbackdata import AdminUserCB
+from core.text import AdminUsersMenu, AdminUserAction
 from handlers.admin.users.helpers import get_user_and_days, render_user
 from handlers.admin.users.users_states import AdminUserStates
 from callbacks.admin_callback_text import AdminUsers, AdminUserActions
@@ -23,7 +24,7 @@ router = Router()
 async def users_main_menu(query: CallbackQuery):
     await query.answer()
     await query.message.edit_text(
-        text="Меню управления юзерами",
+        text=AdminUsersMenu.USER_MANAGE_MENU,
         reply_markup=build_admin_main_users_keyboard(),
     )
 
@@ -35,9 +36,7 @@ async def ask_user_id_for_search(
     await state.set_state(AdminUserStates.SEARCH_BY_USERNAME)
     await query.answer()
     await query.message.edit_text(
-        text=(
-            "Введите username пользователя, которого нужно найти."
-        )
+        text=AdminUserAction.ENTER_USERNAME
     )
 
 
@@ -71,7 +70,7 @@ async def extend_sub_for_user(
     # days = int(days)
 
     if not callback_data.username or not callback_data.days:
-        await query.answer("Некорректные данные.", show_alert=True)
+        await query.answer(text=AdminUserAction.INCORRECT_DATA, show_alert=True)
         return
 
     user = await admin_users_service.extend_subscription(
@@ -97,7 +96,7 @@ async def cancel_subscription(
 ):
 
     if not callback_data.username:
-        await query.answer("Некорректные данные.", show_alert=True)
+        await query.answer(AdminUserAction.INCORRECT_DATA, show_alert=True)
         return
 
     user = await admin_users_service.set_subscription_end(
@@ -124,7 +123,7 @@ async def ask_new_end_date(
 ):
 
     if not callback_data.username:
-        await query.answer("Некорректные данные.", show_alert=True)
+        await query.answer(AdminUserAction.INCORRECT_DATA, show_alert=True)
         return
 
     await state.update_data(target_username=callback_data.username)
@@ -132,11 +131,7 @@ async def ask_new_end_date(
 
     await query.answer()
     await query.message.edit_text(
-        text=(
-            f"Введите новую дату окончания подписки для пользователя {callback_data.username} "
-            "в формате ДД.ММ.ГГГГ.\n"
-            "Например: 25.12.2026\n"
-        )
+        text=AdminUserAction.SET_NEW_DATE.format(username=callback_data.username)
     )
 
 
@@ -146,23 +141,20 @@ async def handle_new_end_date(
     state: FSMContext,
     session: AsyncSession,
 ):
-    """
-    Обработка введённой даты окончания подписки.
-    """
 
     raw = message.text.strip()
     try:
         new_date = datetime.strptime(raw, "%d.%m.%Y").date()
     except ValueError:
         await message.answer(
-            "Некорректный формат даты. Используйте ДД.ММ.ГГГГ, например 25.12.2026, "
+            AdminUserAction.INCORRECT_DATA_FORMAT
         )
         return
 
     data = await state.get_data()
     username = data.get("target_username")
     if username is None:
-        await message.answer("Не удалось определить пользователя. Попробуйте снова через меню админа.")
+        await message.answer(text=AdminUserAction.CANNOT_IDENTIFY_USER)
         await state.clear()
         return
 
@@ -198,7 +190,7 @@ async def delete_user(
 
     if not deleted:
         await query.message.edit_text(
-            text="Пользователь не найден или уже удалён.",
+            text=AdminUserAction.USER_NOT_FOUND_OR_DELETED,
             reply_markup=build_admin_main_users_keyboard(),
         )
         return
@@ -212,10 +204,10 @@ async def delete_user(
     )
 
 
-@router.callback_query(AdminUserCB.filter(F.action == AdminUsers.SEARCH_BY_USERNAME))
+@router.callback_query(F.data == AdminUserActions.BACK_TO_ADMIN_MENU)
 async def back_to_admin_menu(query: CallbackQuery):
     await query.answer()
     await query.message.edit_text(
-        text="Админ: управление пользователями",
+        text=AdminUserAction.BACK_TO_USERS_ADMIN_MENU,
         reply_markup=build_admin_main_users_keyboard(),
     )

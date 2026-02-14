@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from callbacks.admin_callback_text import AdminUsers, AdminUserActions
-from callbacks.admin_user import AdminUserCB
+from callbacks.admin_user_callbackdata import AdminUserCB
 from core.text import AdminUsersKeyboard
 
 
@@ -13,7 +13,7 @@ def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
     """
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="🔍 Поиск по ID",
+        text=AdminUsersKeyboard.USERNAME_SEARCH,
         callback_data=AdminUsers.SEARCH_BY_USERNAME,
     )
     builder.adjust(1)

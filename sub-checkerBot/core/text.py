@@ -18,7 +18,7 @@ class TariffHandler:
     )
 
 class InvoiceHandler:
-    INVOICE_LABEL="Подписка {tariff.title}"
+    INVOICE_LABEL="Подписка {tariff}"
     INVOICE_TITLE="Подписка"
     CURRENCY="RUB"
 
@@ -80,6 +80,8 @@ class AdminUsersKeyboard:
     CANCEL_SUB="✂ Отменить подписку"
     DELETE_USER="🗑 Удалить пользователя"
     BACK_TO_ADMIN_MENU="⬅ В админ-меню"
+    USERNAME_SEARCH="🔍 Поиск по нику"
+
 
 
 

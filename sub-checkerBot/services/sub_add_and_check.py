@@ -156,7 +156,7 @@ async def subscription_checker(db: DatabaseHelper):
                                     "⏰ Ваша подписка заканчивается через 3 дня! Продлите её, чтобы не потерять доступ."
                                 )
                                 logger.info(
-                                    "Отправлено уведомление пользователю user.id (осталось 3 дня)",
+                                    "Отправлено уведомление пользователю %s (осталось 3 дня)",
                                     user.id
                                 )
                             
@@ -227,7 +227,7 @@ async def subscription_checker(db: DatabaseHelper):
                                 logger.error(
                                     "Ошибка при обработке пользователя %s: %s",
                                     user.id,
-                                    ban_error
+                                    user_error
                                 )
                 
                 except Exception as db_error:

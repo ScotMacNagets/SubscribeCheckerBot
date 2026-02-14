@@ -9,7 +9,7 @@ def self_check_text(subscription_end: date | None) -> str:
         end_date = subscription_end.strftime('%d.%m.%Y')
         if days_left < 0:
             return (
-                CheckSubHandlers.SUBSCRIPTION_EXPIRED.format(end_date=end_date),
+                CheckSubHandlers.SUBSCRIPTION_EXPIRED.format(end_date=end_date)
             )
         if days_left < 30 :
             return (
