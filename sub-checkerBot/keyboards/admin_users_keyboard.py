@@ -57,7 +57,7 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
     )
     builder.button(
         text=AdminUsersKeyboard.BACK_TO_ADMIN_MENU,
-        callback_data=AdminUserActions.BACK_TO_ADMIN_MENU,
+        callback_data=AdminUserActions.BACK_TO_USERS_ADMIN_MENU,
     )
     builder.adjust(3, 2, 1)
     return builder.as_markup()
