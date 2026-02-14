@@ -24,3 +24,15 @@ class AdminUserActions:
 class AdminTariffs:
     TARIFFS_MENU = "admin_tariffs_menu"
     BACK_TO_ADMIN_MENU = "admin_tariffs_back_main"
+
+
+class AdminTariffsActions:
+    #List
+    DETAIL="admin_tariffs_detail"
+
+    #Detailed
+    TOGGLE_ACTIVE="admin_tariffs_toggle_active"
+    TOGGLE_HOT="admin_tariffs_toggle_hot"
+    DELETE="admin_tariffs_delete"
+    BACK_TO_THE_LIST="admin_tariffs_back_to_the_list"
+
