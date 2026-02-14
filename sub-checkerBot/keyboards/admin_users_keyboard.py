@@ -16,6 +16,10 @@ def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
         text=AdminUsersKeyboard.USERNAME_SEARCH,
         callback_data=AdminUsers.SEARCH_BY_USERNAME,
     )
+    builder.button(
+        text=AdminUsersKeyboard.BACK_TO_ADMIN_MENU,
+        callback_data=AdminUserActions.BACK_TO_ADMIN_MENU,
+    )
     builder.adjust(1)
     return builder.as_markup()
 
