@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from callbacks.tariff_callbackdata import TariffCallback
+from callbacks.tariff_callbackdata import TariffCB
 from core.config import settings
 from core.models import Tariff
 from core.tariff import get_tariff_by_field, get_all_active_tariffs
@@ -47,11 +47,11 @@ async def buy_sub_callback(
 
 @router.callback_query(
     BuySubscription.choosing_tariff,
-    TariffCallback.filter(),
+    TariffCB.filter(),
 )
 async def tariff_callback(
         query: CallbackQuery,
-        callback_data: TariffCallback,
+        callback_data: TariffCB,
         state: FSMContext,
         session: AsyncSession,
 ):
