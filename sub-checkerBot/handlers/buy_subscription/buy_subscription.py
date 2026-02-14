@@ -1,21 +1,24 @@
 import logging
 
 from aiogram import Router, F
+from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core import constants
+from callbacks.tariff_callbackdata import TariffCallback
 from core.config import settings
-from core.tariff import TARIFFS
-from core.text import TariffHandler, InvoiceHandler, SuccessfulPayment
+from core.models import Tariff
+from core.tariff import get_tariff_by_field, get_all_active_tariffs
+from core.text import TariffHandler, InvoiceHandler, SuccessfulPayment, StartHandler
 from keyboards.payment_keyboard import build_payment_keyboard
+from keyboards.start_keyboard import build_start_keyboard
+from keyboards.tariff_keyboard.tariff_keyboard import build_tariff_keyboard
 from services.sub_add_and_check import (
     add_or_update_subscription,
     add_user_to_channel,
     create_channel_invite_link,
 )
-from handlers.helpers import show_menu
 from .states import BuySubscription
 from callbacks.callback_text import Start, Payment, Back
 
@@ -25,30 +28,47 @@ router = Router()
 
 
 @router.callback_query(F.data == Start.BUY_SUB)
-async def buy_sub_callback(query: CallbackQuery, state: FSMContext):
+async def buy_sub_callback(
+    query: CallbackQuery,
+    state: FSMContext,
+    session: AsyncSession,
+):
     await state.set_state(BuySubscription.choosing_tariff)
-    await query.answer()
-    await show_menu(
-        callback_query=query,
-        menu_key=2
+
+    tariffs = await get_all_active_tariffs(session=session)
+    keyboard = build_tariff_keyboard(tariffs=tariffs)
+
+    await query.message.edit_text(
+        text=TariffHandler.TARIFF,
+        reply_markup=keyboard,
     )
+    await query.answer()
 
 
 @router.callback_query(
     BuySubscription.choosing_tariff,
-    F.data.startswith(constants.TARIFF_CALLBACK_PREFIX),
+    TariffCallback.filter(),
 )
-async def tariff_callback(query: CallbackQuery, state: FSMContext):
-    """
-    Пользователь подтверждает или отменяет оплату
-    """
-    tariff_id = query.data
-    tariff = TARIFFS[tariff_id].title
+async def tariff_callback(
+        query: CallbackQuery,
+        callback_data: TariffCallback,
+        state: FSMContext,
+        session: AsyncSession,
+):
+    payload = callback_data.payload
 
-    await state.update_data(tariff_id=tariff_id)
+    tariff = await get_tariff_by_field(
+        session=session,
+        field=Tariff.payload,
+        value=payload,
+    )
+
+    await state.update_data(
+        tariff_payload=tariff.payload,
+    )
     await state.set_state(BuySubscription.confirming_payment)
 
-    text = TariffHandler.TARIFF_SELECTED.format(title=tariff)
+    text = TariffHandler.TARIFF_SELECTED.format(title=tariff.title)
 
     await query.answer()
     await query.message.edit_text(
@@ -61,17 +81,23 @@ async def tariff_callback(query: CallbackQuery, state: FSMContext):
     BuySubscription.confirming_payment,
     F.data == Payment.CONFIRM_PAY,
 )
-async def confirming_payment_callback(query: CallbackQuery, state: FSMContext):
+async def confirming_payment_callback(query: CallbackQuery, state: FSMContext, session: AsyncSession):
     # Генерируем счет для пользователя в соотвествии с тарифом
     data = await state.get_data()
-    tariff_id = data["tariff_id"]
+    tariff_payload = data["tariff_payload"]
 
-    tariff = TARIFFS[tariff_id]
+    tariff = await get_tariff_by_field(
+        session=session,
+        field=Tariff.payload,
+        value=tariff_payload,
+    )
 
     prices = [
         LabeledPrice(
-            label=InvoiceHandler.INVOICE_LABEL,
-            amount=tariff.price
+            label=InvoiceHandler.INVOICE_LABEL.format(
+                tariff=tariff.title
+            ),
+            amount=(tariff.price * 100)
         )
     ]
     await query.message.answer_invoice(
@@ -108,19 +134,13 @@ async def successful_payment(
         payment_amount,
     )
 
-    tariff = next(
-        (
-            t for t in TARIFFS.values() if t.payload == payload
-        ),
-        None
-    )
+    # Получаем тариф из БД по payload, который пришёл в успешной оплате
+    tariff = await get_tariff_by_field(session=session, payload=payload)
 
     if tariff is None:
         logger.error(
-            "Неизвестный тариф для payload: %s. Доступные тарифы: %s",
+            "Неизвестный тариф для payload: %s",
             payload,
-            [t.payload for t in TARIFFS.values()]
-
         )
         await message.answer(SuccessfulPayment.UNKNOWN_TARIFF)
         await state.clear()
@@ -202,29 +222,40 @@ async def successful_payment(
 async def to_main_menu(query: CallbackQuery, state: FSMContext):
     await state.clear()
     await query.answer()
-    await show_menu(
-        callback_query=query,
-        menu_key=1,
+    await query.message.edit_text(
+        text=StartHandler.START,
+        reply_markup=build_start_keyboard(),
     )
 
 
 @router.callback_query(F.data == Back.BACK)
-async def go_back(query: CallbackQuery, state: FSMContext):
+async def go_back(
+    query: CallbackQuery,
+    state: FSMContext,
+    session: AsyncSession,
+):
     current_state = await state.get_state()
 
     if current_state == BuySubscription.confirming_payment.state:
+        # Возвращаемся к выбору тарифа
         await state.set_state(BuySubscription.choosing_tariff)
-        await show_menu(
-            callback_query=query,
-            menu_key=2,
+        tariffs = await get_all_active_tariffs(session=session)
+        keyboard = build_tariff_keyboard(tariffs=tariffs)
+        await query.message.edit_text(
+            text=TariffHandler.TARIFF,
+            reply_markup=keyboard,
         )
 
     elif current_state == BuySubscription.choosing_tariff.state:
+        # Возврат в главное меню
         await state.clear()
+        from handlers.helpers import show_menu
+
         await show_menu(
             callback_query=query,
             menu_key=1,
         )
+
     await query.answer()
 
 
