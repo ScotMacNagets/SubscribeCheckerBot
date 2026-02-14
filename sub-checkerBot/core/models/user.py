@@ -6,15 +6,7 @@ from .base import Base
 
 
 class User(Base):
-    """
-    Модель пользователя бота.
-
-    id – Telegram user_id (унаследован от Base).
-    subscription_end – дата окончания подписки (None, если подписки нет).
-    created_at – дата/время первой регистрации в системе.
-    username – username пользователя (если есть), для удобства админ-поиска.
-    """
 
     subscription_end: Mapped[date | None] = mapped_column(nullable=True)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.now().date())
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     username: Mapped[str | None] = mapped_column(nullable=True)
