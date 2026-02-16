@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -144,8 +144,15 @@ async def handle_new_end_date(
 ):
 
     raw = message.text.strip()
+    today = date.today()
     try:
         new_date = datetime.strptime(raw, "%d.%m.%Y").date()
+
+        if new_date < today:
+            await message.answer(
+                AdminUserAction.PAST_DATE
+            )
+            return
     except ValueError:
         await message.answer(
             AdminUserAction.INCORRECT_DATA_FORMAT
