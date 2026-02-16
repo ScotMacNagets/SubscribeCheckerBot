@@ -1,5 +1,7 @@
-from .tariffs import router
+from .tariffs import router as tariffs_router
+from .create_tariff import router as create_tariffs_router
 
 __all__ = (
-    "router"
+    "tariffs_router",
+    "create_tariffs_router"
 )
