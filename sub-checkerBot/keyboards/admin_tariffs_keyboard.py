@@ -87,3 +87,19 @@ def build_admin_tariff_detail_keyboard(tariff: Tariff) -> InlineKeyboardMarkup:
     builder.adjust(2, 1, 1)
     return builder.as_markup()
 
+
+def create_tariff_confirmation_keyboard():
+    builder = InlineKeyboardBuilder()
+
+    builder.button(
+        text=AdminTariffKeyboard.CONFIRM,
+        callback_data=AdminTariffsActions.CONFIRM
+    )
+
+    builder.button(
+        text=AdminTariffKeyboard.CANCEL,
+        callback_data=AdminTariffsActions.CANCEL
+    )
+
+    builder.adjust(2)
+    return builder.as_markup()
