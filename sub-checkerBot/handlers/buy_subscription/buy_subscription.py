@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from callbacks.tariff_callbackdata import TariffCB
 from core.config import settings
 from core.models import Tariff
-from core.tariff import get_tariff_by_field, get_all_active_tariffs
+from services.admin_tariffs import get_all_active_tariffs, get_tariff_by_field
 from core.text import TariffHandler, InvoiceHandler, SuccessfulPayment, StartHandler
 from keyboards.payment_keyboard import build_payment_keyboard
 from keyboards.start_keyboard import build_start_keyboard
