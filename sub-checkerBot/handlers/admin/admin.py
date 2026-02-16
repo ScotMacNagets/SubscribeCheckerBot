@@ -17,3 +17,17 @@ async def open_admin_menu(message: Message):
         text=AdminMenu.MENU,
         reply_markup=build_main_menu(),
     )
+
+@router.message(Command(CommandText.CREATE_TARIFF))
+async def stat_create_tariff(
+        message: Message,
+        state: FSMContext,
+):
+    await state.set_state(CreateTariff.title)
+    await message.answer(
+        text=(
+            "Давайте приступим к созданию нового тарифа\n\n"
+            "Для начала введите название нового тарифа:"
+        )
+    )
+
