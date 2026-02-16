@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class AdminConfig(BaseModel):
@@ -14,7 +14,7 @@ class RunConfig(BaseModel):
     token: str
 
 class DatabaseConfig(BaseModel):
-    db_url: str
+    url: PostgresDsn
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -30,4 +30,4 @@ class Settings(BaseSettings):
     payment: PaymentConfig
     admin: AdminConfig
 
-settings = Settings()
+settings: Settings = Settings()
