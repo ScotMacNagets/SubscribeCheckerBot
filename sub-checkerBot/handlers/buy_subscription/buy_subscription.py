@@ -135,7 +135,7 @@ async def successful_payment(
     )
 
     # Получаем тариф из БД по payload, который пришёл в успешной оплате
-    tariff = await get_tariff_by_field(session=session, payload=payload)
+    tariff = await get_tariff_by_field(session=session, value=payload)
 
     if tariff is None:
         logger.error(
