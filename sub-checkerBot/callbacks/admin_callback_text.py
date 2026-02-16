@@ -36,3 +36,7 @@ class AdminTariffsActions:
     DELETE="admin_tariffs_delete"
     BACK_TO_THE_LIST="admin_tariffs_back_to_the_list"
 
+    #Confirm
+    CONFIRM="admin_tariffs_confirm"
+    CANCEL="admin_tariffs_cancel"
+
