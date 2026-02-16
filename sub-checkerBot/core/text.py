@@ -110,6 +110,15 @@ class AdminAllTariffText:
         "Активен: {is_active}"
     )
 
+    #CreateTariff
+    CONFIRMING_TEXT=(
+        "Проверьте данные\n\n"
+        "Название: {title}\n"
+        "Цена: {price}₽\n"
+        "Срок: {days} дней\n"
+    )
+
+
 #BUTTONS:
 
 #start_keyboard
@@ -152,6 +161,13 @@ class AdminTariffKeyboard:
 
     DELETE="🗑 Удалить"
     BACK_TO_THE_LIST="⬅ К списку тарифов"
+
+    #Confirm
+    CONFIRM="✅ Подтвердить"
+    CANCEL="⛔ Отменить"
+
+    CONFIRMED="✅ Тариф успешно создан"
+    CANCELED="⛔ Создание тарифа отменено"
 
 
 
