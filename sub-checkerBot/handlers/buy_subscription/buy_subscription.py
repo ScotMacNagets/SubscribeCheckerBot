@@ -135,7 +135,12 @@ async def successful_payment(
     )
 
     # Получаем тариф из БД по payload, который пришёл в успешной оплате
-    tariff = await get_tariff_by_field(session=session, value=payload)
+
+    tariff = await get_tariff_by_field(
+        session=session,
+        field=Tariff.payload,
+        value=payload,
+    )
 
     if tariff is None:
         logger.error(
@@ -172,6 +177,7 @@ async def successful_payment(
         )
 
         # Добавляем пользователя в канал
+
         channel_added = await add_user_to_channel(user_id)
         end_date = new_end_date.strftime('%d.%m.%Y')
 
