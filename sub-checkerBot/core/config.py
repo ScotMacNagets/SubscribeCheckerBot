@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class AdminConfig(BaseModel):
     support: str
+    super_user: str
 
 class PaymentConfig(BaseModel):
     token: str
