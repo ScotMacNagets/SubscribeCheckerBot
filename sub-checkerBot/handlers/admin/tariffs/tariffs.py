@@ -133,12 +133,7 @@ async def back_to_tariffs_list(
 
 @router.callback_query(F.data == AdminTariffs.BACK_TO_ADMIN_MENU)
 async def back_to_admin_main_menu(query: CallbackQuery):
-    """
-    Возврат в главное админ-меню.
-    """
-    await query.message.edit_text(
-        text="Меню администратора",
-        reply_markup=build_main_menu(),
-    )
+    #Возврат в меню администратора
     await query.answer()
+    await open_admin_menu_helper(query=query)
 

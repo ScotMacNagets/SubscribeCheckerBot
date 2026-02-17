@@ -224,8 +224,9 @@ async def back_to_admin_menu(query: CallbackQuery):
 async def back_to_admin_menu(
     query: CallbackQuery,
 ):
-    await query.answer()
-    await query.message.edit_text(
-        text="Меню администратора",
-        reply_markup=build_main_menu(),
-    )
+    # await query.answer()
+    # await query.message.edit_text(
+    #     text=AdminMenu.MENU,
+    #     reply_markup=build_main_menu(username=query.from_user.username),
+    # )
+    await open_admin_menu_helper(query=query)
