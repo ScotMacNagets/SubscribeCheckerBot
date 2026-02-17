@@ -121,6 +121,10 @@ class AdminAllTariffText:
 
 #BUTTONS:
 
+class GeneralButtons:
+    BACK_BUTTON="⬅ Назад"
+    BACK_TO_ADMIN="⬅ Вернуться в админ меню"
+
 #start_keyboard
 class StartKeyboard:
     BUY_SUBSCRIPTION="✨Приобрести подписку✨"
