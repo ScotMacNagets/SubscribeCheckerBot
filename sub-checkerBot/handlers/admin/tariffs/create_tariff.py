@@ -82,7 +82,7 @@ async def get_days_and_confirming(
     CreateTariff.confirm
 )
 async def confirmed_tariff(
-        callback: CallbackQuery,
+        query: CallbackQuery,
         state: FSMContext,
         session: AsyncSession,
 ):
@@ -106,7 +106,7 @@ async def confirmed_tariff(
     CreateTariff.confirm
 )
 async def canceled_tariff(
-        callback: CallbackQuery,
+        query: CallbackQuery,
         state: FSMContext,
 ):
     await state.clear()
