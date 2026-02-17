@@ -23,7 +23,6 @@ class InvoiceHandler:
     CURRENCY="RUB"
 
 class SuccessfulPayment:
-    UNKNOWN_TARIFF="❌ Неизвестный тариф. Обратитесь к поддержке."
     SUCCESSFUL_INVITE=(
         "✅ Оплата прошла успешно!\n\n"
         "📋 Тариф: {title}\n"

@@ -147,7 +147,10 @@ async def successful_payment(
             "Неизвестный тариф для payload: %s",
             payload,
         )
-        await message.answer(SuccessfulPayment.UNKNOWN_TARIFF)
+        await message.answer(SuccessfulPayment.ACTIVATE_ERROR.format(
+            admin_username=settings.admin.support,
+        ),
+        )
         await state.clear()
         return
 
