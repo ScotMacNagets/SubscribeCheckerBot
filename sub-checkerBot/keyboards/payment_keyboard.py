@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from core.text import PaymentKeyboard
+from core.text import PaymentKeyboard, GeneralButtons
 from callbacks.callback_text import Payment, Back
 
 
@@ -16,7 +16,7 @@ def build_payment_keyboard() -> InlineKeyboardMarkup:
         callback_data=Payment.CANCEL_PAY,
     )
     builder.button(
-        text="Назад",
+        text=GeneralButtons.BACK_BUTTON,
         callback_data=Back.BACK,
     )
     builder.adjust(2,1)

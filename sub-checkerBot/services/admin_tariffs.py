@@ -81,7 +81,7 @@ async def get_tariff_by_field(
 async def render_tariffs_list(
         query: CallbackQuery,
         session: AsyncSession,
-        text: str = AdminTariffMenu.MENU,
+        text: str = AdminTariffMenu.TARIFF_MENU,
 ):
     tariffs = await get_all_tariffs(session=session)
     keyboard = build_admin_tariffs_list_keyboard(tariffs=tariffs)

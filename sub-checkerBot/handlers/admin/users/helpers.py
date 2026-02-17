@@ -15,7 +15,7 @@ def format_user_short(user: User) -> str:
             ),
         )
     else:
-        status = "🔴 нет подписки"
+        status = AdminUsersHelpersText.SHORT_NO_SUB
 
     username = f"@{user.username}" if user.username else "-"
     return f"ID: {user.id} | {username} | {status}"
@@ -32,12 +32,22 @@ def format_user_detail(user: User) -> str:
 
     if user.subscription_end:
         days_left = (user.subscription_end - date.today()).days
-        status = "🟢 активна" if days_left >= 0 else "🔴 истекла"
+
+        status = (
+            AdminUsersHelpersText.STATUS_ACTIVE
+            if days_left >= 0
+            else AdminUsersHelpersText.STATUS_EXPIRED
+        )
+
         lines.append(
-            f"Подписка: {status}, до {user.subscription_end.strftime('%d.%m.%Y')} (дней: {days_left})"
+            AdminUsersHelpersText.SUB_DESC.format(
+                status=status,
+                date=user.subscription_end.strftime('%d.%m.%Y'),
+                days_left=abs(days_left),
+            )
         ),
     else:
-        lines.append("Подписка: отсутствует")
+        lines.append(AdminUsersHelpersText.USER_GOT_NO_SUB)
 
     return "\n".join(lines)
 

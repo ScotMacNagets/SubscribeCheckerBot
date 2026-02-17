@@ -91,10 +91,15 @@ class AdminUsersHelpersText:
         "Username: @{username}\n"
         "Создан: {date}"
     )
-    USER_NOT_FOUND="Пользователь не найден"
-    USER_SUCCESSFULLY_DELETED="Пользователь успешно удален"
     USER_NOT_FOUND="❌ Пользователь не найден"
     USER_SUCCESSFULLY_DELETED="✅ Пользователь успешно удален"
+
+    STATUS_ACTIVE="🟢 активна"
+    STATUS_EXPIRED="🔴 истекла"
+
+    SUB_DESC="Подписка: {status}, до {date} (дней: {days_left})"
+
+    USER_GOT_NO_SUB="❌ Подписка: отсутствует"
 
 
 #Tariff

@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_callback_text import AdminTariffs, AdminTariffsActions
 from callbacks.admin_tariff_callbackdata import AdminTariffCB
-from core.text import AdminAllTariffText
+from core.text import AdminAllTariffText, AdminTariffMenu
+from handlers.admin.helpers import open_admin_menu_helper
 from services.admin_tariffs import get_specific_tariff, toggle_tariff_field, render_tariffs_list
-from keyboards.admin_main_menu import build_main_menu
 from keyboards.admin_tariffs_keyboard import build_admin_tariff_detail_keyboard
 
 logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ async def delete_tariff(
     await render_tariffs_list(
         query=query,
         session=session,
-        text="Тариф удалён.\n\nМеню управления тарифами:"
+        text=AdminTariffMenu.AFTER_DELETING
     )
 
 

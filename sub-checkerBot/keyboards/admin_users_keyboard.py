@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from callbacks.admin_callback_text import AdminUsers, AdminUserActions
 from callbacks.admin_user_callbackdata import AdminUserCB
-from core.text import AdminUsersKeyboard
+from core.text import AdminUsersKeyboard, GeneralButtons
 
 
 def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
@@ -17,7 +17,7 @@ def build_admin_main_users_keyboard() -> InlineKeyboardMarkup:
         callback_data=AdminUsers.SEARCH_BY_USERNAME,
     )
     builder.button(
-        text=AdminUsersKeyboard.BACK_TO_ADMIN_MENU,
+        text=GeneralButtons.BACK_TO_ADMIN,
         callback_data=AdminUserActions.BACK_TO_ADMIN_MENU,
     )
     builder.adjust(1)
@@ -60,7 +60,7 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
         ).pack()
     )
     builder.button(
-        text=AdminUsersKeyboard.BACK_TO_ADMIN_MENU,
+        text=GeneralButtons.BACK_BUTTON,
         callback_data=AdminUserActions.BACK_TO_USERS_ADMIN_MENU,
     )
     builder.adjust(3, 2, 1)

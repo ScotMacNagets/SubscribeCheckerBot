@@ -34,7 +34,7 @@ async def get_title(
         title=message.text,
     )
     await state.set_state(CreateTariff.price)
-    await message.answer("Теперь укажите цену тарифа")
+    await message.answer(AdminAllTariffText.SET_TARIFF_PRICE)
 
 
 @router.message(CreateTariff.price)
@@ -48,7 +48,7 @@ async def get_price(
     )
 
     await state.set_state(CreateTariff.days)
-    await message.answer("Теперь укажите длительность тарифа в днях")
+    await message.answer(AdminAllTariffText.SET_DURATION_IN_DAYS)
 
 
 @router.message(CreateTariff.days)

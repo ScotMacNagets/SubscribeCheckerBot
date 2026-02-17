@@ -8,8 +8,8 @@ from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_user_callbackdata import AdminUserCB
-from core.text import AdminUsersMenu, AdminUserAction
-from keyboards.admin_main_menu import build_main_menu
+from core.text import AdminUsersMenu, AdminUserAction, AdminMenu
+from handlers.admin.helpers import open_admin_menu_helper
 from services.admin_users import render_user
 from handlers.admin.users.users_states import AdminUserStates
 from callbacks.admin_callback_text import AdminUsers, AdminUserActions

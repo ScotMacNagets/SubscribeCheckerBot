@@ -1,6 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from core.text import RenewKeyboard
+from core.text import RenewKeyboard, GeneralButtons
 from callbacks.callback_text import Back, Start
 
 
@@ -9,7 +9,7 @@ def build_renew_keyboard(only_back: bool = False):
 
     if only_back:
         builder.button(
-            text="Назад",
+            text=GeneralButtons.BACK_BUTTON,
             callback_data=Back.CHECK_BACK
         )
 
@@ -20,7 +20,7 @@ def build_renew_keyboard(only_back: bool = False):
         )
 
         builder.button(
-            text="Назад",
+            text=GeneralButtons.BACK_BUTTON,
             callback_data=Back.CHECK_BACK
         )
 
