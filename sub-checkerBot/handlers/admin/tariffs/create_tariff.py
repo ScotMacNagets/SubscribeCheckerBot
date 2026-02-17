@@ -1,16 +1,29 @@
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, InlineKeyboardMarkup, CallbackQuery
+from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_callback_text import AdminTariffsActions
+from core.constants import CommandText
 from core.text import AdminAllTariffText, AdminTariffKeyboard
+from handlers.admin.helpers import open_admin_menu_helper
 from handlers.admin.tariffs.fsm_states import CreateTariff
-from keyboards.admin_tariffs_keyboard import create_tariff_confirmation_keyboard
+from keyboards.admin_tariffs_keyboard import create_tariff_confirmation_keyboard, back_to_admin_menu_keyboard
 from services.admin_tariffs import create_tariff
 
 router = Router()
 
+
+@router.callback_query(F.data == AdminTariffsActions.START_CREATING)
+async def stat_create_tariff(
+        query: CallbackQuery,
+        state: FSMContext,
+):
+    await state.set_state(CreateTariff.title)
+    await query.message.edit_text(
+        text=AdminAllTariffText.START_MESSAGE
+    )
 
 @router.message(CreateTariff.title)
 async def get_title(
