@@ -103,3 +103,13 @@ def create_tariff_confirmation_keyboard():
 
     builder.adjust(2)
     return builder.as_markup()
+
+def back_to_admin_menu_keyboard():
+    builder = InlineKeyboardBuilder()
+
+    builder.button(
+        text=GeneralButtons.BACK_TO_ADMIN,
+        callback_data=AdminUserActions.BACK_TO_ADMIN_MENU,
+    )
+
+    return builder.as_markup()

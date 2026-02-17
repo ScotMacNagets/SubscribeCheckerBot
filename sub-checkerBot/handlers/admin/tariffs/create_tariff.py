@@ -94,10 +94,11 @@ async def confirmed_tariff(
     )
 
     await state.clear()
-    await callback.message.edit_text(
-        text=AdminTariffKeyboard.CONFIRMED
+    await query.message.edit_text(
+        text=AdminTariffKeyboard.CONFIRMED,
+        reply_markup=back_to_admin_menu_keyboard(),
     )
-    await callback.answer()
+    await query.answer()
 
 
 @router.callback_query(
@@ -109,8 +110,11 @@ async def canceled_tariff(
         state: FSMContext,
 ):
     await state.clear()
-    await callback.message.edit_text(
-        text=AdminTariffKeyboard.CANCELED
+
+    await query.answer()
+    await query.message.edit_text(
+        text=AdminTariffKeyboard.CANCELED,
+        reply_markup=back_to_admin_menu_keyboard()
     )
-    await callback.answer()
+
 
