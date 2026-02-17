@@ -160,7 +160,6 @@ class AdminUsersKeyboard:
     SET_THE_DATE="📅 Установить дату"
     CANCEL_SUB="✂ Отменить подписку"
     DELETE_USER="🗑 Удалить пользователя"
-    BACK_TO_ADMIN_MENU="⬅ В админ-меню"
     USERNAME_SEARCH="📂🔍 Поиск по нику"
 
 #admin_tariffs_keyboard
