@@ -24,10 +24,12 @@ router = Router()
 @router.callback_query(F.data == AdminUsers.HUMAN_RESOURCE)
 async def users_main_menu(query: CallbackQuery):
     await query.answer()
+    logger.info("Users menu opened | %s", query.from_user.id)
     await query.message.edit_text(
         text=AdminUsersMenu.USER_MANAGE_MENU,
         reply_markup=build_admin_main_users_keyboard(),
     )
+
 
 @router.callback_query(F.data == AdminUsers.SEARCH_BY_USERNAME)
 async def ask_user_id_for_search(
@@ -36,6 +38,7 @@ async def ask_user_id_for_search(
 ):
     await state.set_state(AdminUserStates.SEARCH_BY_USERNAME)
     await query.answer()
+    logger.info("Search by username | %s", query.from_user.id)
     await query.message.edit_text(
         text=AdminUserAction.ENTER_USERNAME
     )
@@ -48,8 +51,19 @@ async def handle_user_search_by_id(
     session: AsyncSession,
 ):
     username = message.text.strip().lstrip("@")
+    logger.info("Searching for user with username %s | by %s", username, message.from_user.id)
 
     user = await admin_users_service.get_user_by_username(session=session, username=username)
+
+    if not user:
+        await message.edit_text(
+            text=AdminUserAction.USER_NOT_FOUND,
+        )
+        await back_to_users_admin_menu(message=message)
+        logger.info("User %s not found | by %s", username, message.from_user.id)
+        return
+
+    logger.info("User %s found | by %s", username, message.from_user.id)
 
 
     await render_user(
@@ -67,17 +81,34 @@ async def extend_sub_for_user(
     callback_data: AdminUserCB,
     session: AsyncSession,
 ):
-    # days, username = get_user_and_days(query=query)
-    # days = int(days)
+    logger.info("Extending sub for %s | by %s", callback_data.username, query.from_user.id)
 
     if not callback_data.username or not callback_data.days:
+        logger.warning(
+            "Invalid data received for extension: %s | by %s",
+            callback_data.username,
+            query.from_user.id,
+        )
         await query.answer(text=AdminUserAction.INCORRECT_DATA, show_alert=True)
         return
+    try:
+        user = await admin_users_service.extend_subscription(
+            session=session,
+            username=callback_data.username,
+            days=callback_data.days,
+        )
+    except Exception as error:
+        logger.exception(
+            "Failed to extend subscription for %s | by %s",
+            callback_data.username,
+            query.from_user.id,
+        )
+        raise
 
-    user = await admin_users_service.extend_subscription(
-        session=session,
-        username=callback_data.username,
-        days=callback_data.days,
+    logger.info(
+        "User subscription extended successfully for %s | by %s",
+        callback_data.username,
+        query.from_user.id,
     )
 
     await render_user(
@@ -95,8 +126,17 @@ async def cancel_subscription(
     callback_data: AdminUserCB,
     session: AsyncSession,
 ):
-
+    logger.info(
+        "Cancelling subscription for %s | by %s",
+        callback_data.username,
+        query.from_user.id,
+    )
     if not callback_data.username:
+        logger.error(
+            "Invalid data received for cancelation: %s | by %s",
+            callback_data.username,
+            query.from_user.id,
+        )
         await query.answer(AdminUserAction.INCORRECT_DATA, show_alert=True)
         return
 
@@ -106,6 +146,11 @@ async def cancel_subscription(
         cancel=True,
     )
 
+    logger.info(
+        "User subscription cancelled successfully for %s | by %s",
+        callback_data.username,
+        query.from_user.id,
+    )
 
     await render_user(
         user=user,
@@ -122,13 +167,27 @@ async def ask_new_end_date(
     callback_data: AdminUserCB,
     state: FSMContext,
 ):
-
+    logger.info(
+        "Set end date requested for %s | by %s",
+        callback_data.username,
+        query.from_user.id,
+    )
     if not callback_data.username:
+        logger.error(
+            "Invalid data received for setting new date: %s | by %s",
+            callback_data.username,
+            query.from_user.id,
+        )
         await query.answer(AdminUserAction.INCORRECT_DATA, show_alert=True)
         return
 
     await state.update_data(target_username=callback_data.username)
     await state.set_state(AdminUserStates.SET_END_DATE)
+    logger.info(
+        "Setting new end date for %s started | by %s",
+        callback_data.username,
+        query.from_user.id,
+    )
 
     await query.answer()
     await query.message.edit_text(
@@ -145,24 +204,32 @@ async def handle_new_end_date(
 
     raw = message.text.strip()
     today = date.today()
-    try:
-        new_date = datetime.strptime(raw, "%d.%m.%Y").date()
 
-        if new_date < today:
-            await message.answer(
-                AdminUserAction.PAST_DATE
-            )
-            return
-    except ValueError:
+    new_date = datetime.strptime(raw, "%d.%m.%Y").date()
+
+    if new_date < today:
         await message.answer(
-            AdminUserAction.INCORRECT_DATA_FORMAT
+            AdminUserAction.PAST_DATE
         )
         return
+    logger.warning(
+        "Invalid data format: %s | by %s",
+        raw,
+        message.from_user.id,
+    )
+    await message.answer(
+        AdminUserAction.INCORRECT_DATA_FORMAT
+    )
 
     data = await state.get_data()
     username = data.get("target_username")
     if username is None:
         await message.answer(text=AdminUserAction.CANNOT_IDENTIFY_USER)
+        logger.error(
+            "Invalid data format: %s | by %s",
+            raw,
+            message.from_user.id,
+        )
         await state.clear()
         return
 
@@ -170,6 +237,12 @@ async def handle_new_end_date(
         session=session,
         username=username,
         new_end=new_date,
+    )
+
+    logger.info(
+        "Successfully set new date for %s | by %s",
+        username,
+        message.from_user.id,
     )
 
     await state.clear()
@@ -189,6 +262,7 @@ async def delete_user(
     callback_data: AdminUserCB,
     session: AsyncSession,
 ):
+    logger.info("Deleting user %s requested | by %s", callback_data.username, query.from_user.id)
     username = callback_data.username
     deleted = await admin_users_service.delete_user(
         session=session,
@@ -203,6 +277,8 @@ async def delete_user(
         )
         return
 
+    logger.info("User %s successfully deleted | by %s", callback_data.username, query.from_user.id)
+
     await render_user(
         username=username,
         target=query,
@@ -213,10 +289,10 @@ async def delete_user(
 
 
 @router.callback_query(F.data == AdminUserActions.BACK_TO_USERS_ADMIN_MENU)
-async def back_to_admin_menu(query: CallbackQuery):
+async def back_to_users_admin_menu(query: CallbackQuery):
     await query.answer()
     await query.message.edit_text(
-        text=AdminUserAction.BACK_TO_USERS_ADMIN_MENU,
+        text=AdminUsersMenu.USER_MANAGE_MENU,
         reply_markup=build_admin_main_users_keyboard(),
     )
 

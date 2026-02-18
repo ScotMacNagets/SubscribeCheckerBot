@@ -1,18 +1,19 @@
+import logging
+
 from aiogram import Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_callback_text import AdminTariffsActions
-from core.constants import CommandText
 from core.text import AdminAllTariffText, AdminTariffKeyboard
-from handlers.admin.helpers import open_admin_menu_helper
 from handlers.admin.tariffs.fsm_states import CreateTariff
 from keyboards.admin_tariffs_keyboard import create_tariff_confirmation_keyboard, back_to_admin_menu_keyboard
 from services.admin_tariffs import create_tariff
 
 router = Router()
+
+logger = logging.getLogger(__name__)
 
 
 @router.callback_query(F.data == AdminTariffsActions.START_CREATING)
@@ -87,17 +88,25 @@ async def confirmed_tariff(
         session: AsyncSession,
 ):
     data = await state.get_data()
+    try:
+        await create_tariff(
+            session=session,
+            data=data,
+        )
+    except ValueError as error:
+        logger.error(
+            "Ошибка при создании пользователя: %s",
+            error
+        )
+        await query.message.edit_text(AdminAllTariffText.CREATING_ERROR)
 
-    await create_tariff(
-        session=session,
-        data=data,
-    )
 
-    await state.clear()
     await query.message.edit_text(
         text=AdminTariffKeyboard.CONFIRMED,
         reply_markup=back_to_admin_menu_keyboard(),
     )
+    logger.info("Новый тариф успешно создан")
+    await state.clear()
     await query.answer()
 
 
@@ -109,12 +118,13 @@ async def canceled_tariff(
         query: CallbackQuery,
         state: FSMContext,
 ):
-    await state.clear()
 
     await query.answer()
     await query.message.edit_text(
         text=AdminTariffKeyboard.CANCELED,
         reply_markup=back_to_admin_menu_keyboard()
     )
+    logger.info("Создание нового тарифа было отменено")
+    await state.clear()
 
 

@@ -1,3 +1,4 @@
+import logging
 from datetime import date, timedelta
 from typing import Optional
 
@@ -10,14 +11,25 @@ from core.text import AdminUsersHelpersText
 from handlers.admin.users.helpers import format_user_short, format_user_detail
 from keyboards.admin_users_keyboard import build_user_actions_keyboard
 
+logger = logging.getLogger(__name__)
+
 
 async def get_user_by_username(session: AsyncSession, username: str) -> Optional[User]:
     """
     Возвращает пользователя по username или None, если не найден.
     """
-    stmt = select(User).where(User.username == username)
-    result = await session.execute(stmt)
-    return result.scalars().first()
+    try:
+        stmt = select(User).where(User.username == username)
+        result = await session.execute(stmt)
+        user = result.scalars().first()
+        return user
+    except ValueError as error:
+        logger.error(
+            "User with %s not found: %s",
+            username,
+            error,
+        )
+        return None
 
 
 async def extend_subscription(

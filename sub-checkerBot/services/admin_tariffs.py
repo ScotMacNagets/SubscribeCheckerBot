@@ -1,3 +1,5 @@
+import logging
+
 from aiogram.types import CallbackQuery
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +9,8 @@ from core.models import Tariff
 from core.text import AdminTariffMenu
 from keyboards.admin_tariffs_keyboard import build_admin_tariffs_list_keyboard
 
+logger = logging.getLogger(__name__)
+
 
 async def get_specific_tariff(
         session: AsyncSession,
@@ -15,6 +19,8 @@ async def get_specific_tariff(
         deleting: bool = False,
 ) -> Tariff | None:
 
+    logger.info("Receiving tariff")
+
     tariff = await get_tariff_by_field(
         session=session,
         field=Tariff.id,
@@ -22,12 +28,16 @@ async def get_specific_tariff(
     )
     if tariff is None:
         if deleting:
+            logger.info("Tariff not found or deleted")
             return query.message.answer(
                 text="Тариф уже удалён или не найден"
             )
+        logger.info("Tariff not found")
         return query.message.answer(
             text="Тариф не найден"
         )
+
+    logging.info("Tariff %s received", tariff.title)
     return tariff
 
 
@@ -62,10 +72,13 @@ async def get_all_active_tariffs(session: AsyncSession) -> list[Tariff]:
 
 
 async def get_all_tariffs(session: AsyncSession) -> list[Tariff]:
+    try:
+        stmt = select(Tariff).order_by(Tariff.sort_order, Tariff.id)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+    except ValueError as error:
+        logger.error("Tariffs getting failed: %s", error)
 
-    stmt = select(Tariff).order_by(Tariff.sort_order, Tariff.id)
-    result = await session.execute(stmt)
-    return result.scalars().all()
 
 
 async def get_tariff_by_field(
@@ -73,9 +86,12 @@ async def get_tariff_by_field(
         field,
         value,
 ) -> Tariff | None:
-    stmt = select(Tariff).where(field == value)
-    result = await session.execute(stmt)
-    return result.scalars().one_or_none()
+    try:
+        stmt = select(Tariff).where(field == value)
+        result = await session.execute(stmt)
+        return result.scalars().one_or_none()
+    except ValueError as error:
+        logger.error("Tariff getting failed: %s", error)
 
 
 async def render_tariffs_list(
