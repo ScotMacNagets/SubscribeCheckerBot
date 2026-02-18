@@ -22,7 +22,7 @@ async def open_tariffs_menu(
     session: AsyncSession,
 ):
     #Главное меню управления тарифами.
-
+    logger.info("Opened tariff menu | by %s", query.from_user.id)
     await render_tariffs_list(
         query=query,
         session=session,
@@ -38,6 +38,7 @@ async def show_tariff_detail(
     """
     Детальная информация по тарифу и действия над ним.
     """
+    logger.info("Choose one tariff | by %s", query.from_user.id)
     tariff = await get_specific_tariff(
         query=query,
         session=session,
@@ -71,6 +72,7 @@ async def toggle_tariff_active(
     callback_data: AdminTariffCB,
     session: AsyncSession,
 ):
+    logger.info("Toggle tariff to active/unactive | by %s", query.from_user.id)
     await toggle_tariff_field(
         query=query,
         callback_data=callback_data,
@@ -87,6 +89,7 @@ async def toggle_tariff_hot(
     callback_data: AdminTariffCB,
     session: AsyncSession,
 ):
+    logger.info("Toggle tariff to hot/default | by %s", query.from_user.id)
     await toggle_tariff_field(
         query=query,
         callback_data=callback_data,
@@ -103,6 +106,7 @@ async def delete_tariff(
     callback_data: AdminTariffCB,
     session: AsyncSession,
 ):
+    logger.info("Requested tariff deleting | by %s", query.from_user.id)
     tariff = await get_specific_tariff(
         session=session,
         callback_data=callback_data,
@@ -112,6 +116,8 @@ async def delete_tariff(
 
     await session.delete(tariff)
     await session.commit()
+
+    logger.info("Tariff successfully deleted | by %s", query.from_user.id)
 
     await render_tariffs_list(
         query=query,
@@ -125,6 +131,7 @@ async def back_to_tariffs_list(
     query: CallbackQuery,
     session: AsyncSession,
 ):
+    logger.info("Back to the list of tariffs | by %s", query.from_user.id)
     await render_tariffs_list(
         query=query,
         session=session,
@@ -136,4 +143,5 @@ async def back_to_admin_main_menu(query: CallbackQuery):
     #Возврат в меню администратора
     await query.answer()
     await open_admin_menu_helper(query=query)
+    logger.info("Back to the main menu | by %s", query.from_user.id)
 

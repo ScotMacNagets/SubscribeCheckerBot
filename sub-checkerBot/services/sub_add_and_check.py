@@ -36,7 +36,7 @@ async def add_or_update_subscription(
         )
         session.add(user)
     else:
-        if user.subscription_end > now:
+        if user.subscription_end is not None and user.subscription_end > now:
             user.subscription_end += timedelta(days=days)
         else:
             user.subscription_end = now + timedelta(days=days)

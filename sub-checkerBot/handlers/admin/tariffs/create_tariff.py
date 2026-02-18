@@ -21,6 +21,7 @@ async def stat_create_tariff(
         query: CallbackQuery,
         state: FSMContext,
 ):
+    logger.info("New tariff creating started | by %s", query.from_user.id)
     await state.set_state(CreateTariff.title)
     await query.message.edit_text(
         text=AdminAllTariffText.START_MESSAGE
@@ -31,6 +32,7 @@ async def get_title(
         message: Message,
         state: FSMContext,
 ):
+    logger.info("Set a title | by %s", message.from_user.id)
     await state.update_data(
         title=message.text,
     )
@@ -43,6 +45,7 @@ async def get_price(
         message: Message,
         state: FSMContext,
 ):
+    logger.info("Set a price | by %s", message.from_user.id)
     price = int(message.text)
     await state.update_data(
         price=price,
@@ -57,6 +60,7 @@ async def get_days_and_confirming(
         message: Message,
         state: FSMContext,
 ):
+    logger.info("Set number of days | by %s", message.from_user.id)
     days = int(message.text)
     await state.update_data(
         days=days,

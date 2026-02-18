@@ -21,7 +21,7 @@ async def open_admin_menu(message: Message):
         await message.answer("Ошибка при открытии меню, обратитесь к администратору")
         return
 
-    logger.info("Admin menu opened | user_id=%s", user_id)
+    logger.info("Admin menu opened | by %s", user_id)
 
 
 
