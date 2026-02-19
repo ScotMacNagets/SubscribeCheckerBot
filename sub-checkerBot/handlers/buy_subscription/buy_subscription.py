@@ -14,7 +14,7 @@ from core.text import TariffHandler, InvoiceHandler, SuccessfulPayment, StartHan
 from keyboards.payment_keyboard import build_payment_keyboard
 from keyboards.start_keyboard import build_start_keyboard
 from keyboards.tariff_keyboard.tariff_keyboard import build_tariff_keyboard
-from services.sub_add_and_check import (
+from services.sub_add import (
     add_or_update_subscription,
     add_user_to_channel,
     create_channel_invite_link,
