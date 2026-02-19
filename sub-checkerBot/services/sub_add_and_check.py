@@ -10,6 +10,7 @@ from core.config import settings
 from core.models import User
 from core.bot_instance import bot
 from core.models.db_helper import DatabaseHelper
+from core.text import CheckSubServices
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +154,7 @@ async def subscription_checker(db: DatabaseHelper):
                         if days_left == 3:
                             await bot.send_message(
                                 user.id,
-                                "⏰ Ваша подписка заканчивается через 3 дня! Продлите её, чтобы не потерять доступ."
+                                CheckSubServices.THREE_DAYS_LEFT
                             )
                             logger.info(
                                 "Отправлено уведомление пользователю %s (осталось 3 дня)",
@@ -163,7 +164,7 @@ async def subscription_checker(db: DatabaseHelper):
                         elif days_left == 1:
                             await bot.send_message(
                                 user.id,
-                                "⚠️ Ваша подписка заканчивается завтра! Продлите её сейчас."
+                                CheckSubServices.ONE_DAY_LEFT
                             )
                             logger.info(
                                 "Отправлено уведомление пользователю %s (осталось 1 день)",
@@ -173,7 +174,7 @@ async def subscription_checker(db: DatabaseHelper):
                         elif days_left == 0:
                             await bot.send_message(
                                 user.id,
-                                "❌ Ваша подписка истекла сегодня. Доступ к каналу будет закрыт."
+                                CheckSubServices.SUBSCRIBE_EXPIRED
                             )
                             logger.info(
                                 "Отправлено уведомление пользователю %s (подписка истекла)",
@@ -236,8 +237,8 @@ async def subscription_checker(db: DatabaseHelper):
                     db_error
                 )
 
-    except Exception as e:
+    except Exception as error:
         logger.error(
             "Критическая ошибка в subscription_checker: %s",
-            e
+            error
         )

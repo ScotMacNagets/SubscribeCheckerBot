@@ -44,6 +44,11 @@ class SuccessfulPayment:
     )
 
 #CheckSub
+class CheckSubServices:
+    THREE_DAYS_LEFT="⏰ Ваша подписка заканчивается через 3 дня! Продлите её, чтобы не потерять доступ."
+    ONE_DAY_LEFT="⚠️ Ваша подписка заканчивается завтра! Продлите её сейчас."
+    SUBSCRIBE_EXPIRED="❌ Ваша подписка истекла сегодня. Доступ к каналу будет закрыт."
+
 class CheckSubHandlers:
     SUBSCRIPTION_EXPIRED=(
         "⚠️ Ваша подписка закончилась {end_date}.\n"
