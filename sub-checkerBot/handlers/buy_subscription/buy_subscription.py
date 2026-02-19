@@ -43,6 +43,12 @@ async def buy_sub_callback(
     )
     await query.answer()
 
+    logger.info(
+        "User choose tariff | by username %s | id %s",
+        query.from_user.username,
+        query.from_user.id,
+    )
+
 
 @router.callback_query(
     BuySubscription.choosing_tariff,
@@ -74,6 +80,11 @@ async def tariff_callback(
         text=text,
         reply_markup=build_payment_keyboard()
     ),
+    logger.info(
+        "User selected tariff | by username %s | id %s",
+        query.from_user.username,
+        query.from_user.id,
+    )
 
 
 @router.callback_query(
@@ -109,6 +120,12 @@ async def confirming_payment_callback(query: CallbackQuery, state: FSMContext, s
     )
 
     await query.answer()
+
+    logger.info(
+        "User initialized payment process  | by username %s | id %s",
+        query.from_user.username,
+        query.from_user.id,
+    )
 
 
 @router.pre_checkout_query()
@@ -232,6 +249,12 @@ async def to_main_menu(query: CallbackQuery, state: FSMContext):
     await query.message.edit_text(
         text=StartHandler.START,
         reply_markup=build_start_keyboard(),
+    )
+
+    logger.info(
+        "User cancel payment | by username %s | id %s",
+        query.from_user.username,
+        query.from_user.id,
     )
 
 

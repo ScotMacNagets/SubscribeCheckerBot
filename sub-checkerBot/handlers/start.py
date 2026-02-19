@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Router, F
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message, CallbackQuery
@@ -10,10 +12,16 @@ from keyboards.start_keyboard import build_start_keyboard
 
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 @router.message(CommandStart())
 async def start(message: Message):
+    logger.info(
+        "User started bot| by username %s | id %s",
+        message.from_user.username,
+        message.from_user.id,
+    )
     await message.answer(
         text=StartHandler.START,
         reply_markup=build_start_keyboard(),
