@@ -6,12 +6,13 @@ from aiogram import Dispatcher
 from core.bot_instance import bot
 from core.logging_config import configure_logging
 from core.models.db_helper import db_helper
+from core.scheduler import create_scheduler
 from middleware import DBMiddleware
 from handlers import start_router, buy_subscription_router, check_sub_router, admin_router
-from services.sub_add_and_check import subscription_checker
 
 
 logger = logging.getLogger(__name__)
+scheduler = create_scheduler(bot, db_helper)
 
 dp = Dispatcher()
 
@@ -31,14 +32,19 @@ async def on_startup():
     logger.info("Middleware подключен")
     
     # Запускаем фоновую задачу проверки подписок
-    asyncio.create_task(subscription_checker(db=db_helper))
+    scheduler.start()
     logger.info("Фоновая задача проверки подписок запущена")
 
 @dp.shutdown()
 async def on_shutdown():
     logger.info("Остановка бота...")
+
     await db_helper.dispose()
     logger.info("Соединения с БД закрыты")
+
+    scheduler.shutdown()
+    logger.info("Фоновая задача проверки подписок остановлена")
+
 
 async def main():
     try:
