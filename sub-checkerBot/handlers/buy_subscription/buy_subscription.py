@@ -1,7 +1,6 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -128,7 +127,7 @@ async def successful_payment(
     payment_amount = message.successful_payment.total_amount
 
     logger.info(
-        "Получена успешная оплата от пользователя %s, payload: %s, сумма: %s",
+        "Got payment from user %s, payload: %s, sum: %s",
         user_id,
         payload,
         payment_amount,
@@ -144,7 +143,7 @@ async def successful_payment(
 
     if tariff is None:
         logger.error(
-            "Неизвестный тариф для payload: %s",
+            "Unknown tariff: %s",
             payload,
         )
         await message.answer(SuccessfulPayment.ACTIVATE_ERROR.format(
@@ -157,8 +156,8 @@ async def successful_payment(
     # Проверка суммы платежа (опционально, для безопасности)
     if payment_amount != tariff.price:
         logger.warning(
-            "Несоответствие суммы платежа для пользователя %s: "
-            "ожидалось %s, получено %s"
+            "Discrepancy in the payment amount %s: "
+            "Expected %s, received %s"
             ,
             user_id,
             tariff.price,
@@ -174,7 +173,7 @@ async def successful_payment(
             days=tariff.days,
         )
         logger.info(
-            "Подписка для пользователя %s обновлена до %s",
+            "User %s subscription has benn updated until %s",
             user_id,
             new_end_date
         )
@@ -212,7 +211,7 @@ async def successful_payment(
 
     except Exception as e:
         logger.error(
-            "Ошибка при обработке оплаты для пользователя %s: %s",
+            "Payment processing error %s: %s",
             user_id,
             e,
             exc_info=True
@@ -224,7 +223,6 @@ async def successful_payment(
             parse_mode="HTML",
         )
         await state.clear()
-
 
 
 @router.callback_query(F.data == Payment.CANCEL_PAY)

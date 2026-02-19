@@ -24,46 +24,46 @@ dp.include_router(admin_router)
 @dp.startup()
 async def on_startup():
     configure_logging(level=logging.INFO)
-    logger.info("Запуск бота...")
+    logger.info("Bot starting...")
     await db_helper.create_tables()
-    logger.info("Таблицы БД созданы/проверены")
+    logger.info("DB table checked/created")
     
     dp.update.middleware(DBMiddleware(db=db_helper))
-    logger.info("Middleware подключен")
+    logger.info("Middleware connected")
     
     # Запускаем фоновую задачу проверки подписок
     scheduler.start()
-    logger.info("Фоновая задача проверки подписок запущена")
+    logger.info("SubChecker background task started")
 
 @dp.shutdown()
 async def on_shutdown():
-    logger.info("Остановка бота...")
+    logger.info("Bot shutdown...")
 
     await db_helper.dispose()
-    logger.info("Соединения с БД закрыты")
+    logger.info("DB connection closed")
 
     scheduler.shutdown()
-    logger.info("Фоновая задача проверки подписок остановлена")
+    logger.info("SubChecker background task shutdown")
 
 
 async def main():
     try:
-        logger.info("Бот запущен и готов к работе")
+        logger.info("Bot started and ready to work")
         await dp.start_polling(
             bot,
             skip_updates=True,
         )
     except (KeyboardInterrupt, asyncio.CancelledError):
-        logger.info("Получен сигнал остановки. Завершение работы...")
+        logger.info("Got stop signal. Shutting down...")
     except Exception as e:
         logger.critical(
-            "Критическая ошибка при работе бота: %s",
+            "Critical error while bot working: %s",
             e,
             exc_info=True
         )
     finally:
         await bot.session.close()
-        logger.info("Сессия бота закрыта")
+        logger.info("Bot session closed")
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -15,7 +15,7 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
     Проверка подписок и уведомления пользователей.
     Запускается в фоновом режиме и проверяет подписки раз в день.
     """
-    logger.info("Запуск проверки подписок")
+    logger.info("Subscription checker started")
 
     try:
         today = datetime.datetime.now(datetime.timezone.utc).date()
@@ -32,7 +32,10 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                 )
                 users = result.scalars().all()
 
-                logger.info(f"Проверка подписок для {len(users)} пользователей")
+                logger.info(
+                    "Subscription checking for %s users",
+                    len(users)
+                )
 
                 for user in users:
                     days_left = (user.subscription_end - today).days
@@ -44,7 +47,7 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                                 CheckSubServices.THREE_DAYS_LEFT
                             )
                             logger.info(
-                                "Отправлено уведомление пользователю %s (осталось 3 дня)",
+                                "Notification sent to %s user (3 days left)",
                                 user.id
                             )
 
@@ -54,7 +57,7 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                                 CheckSubServices.ONE_DAY_LEFT
                             )
                             logger.info(
-                                "Отправлено уведомление пользователю %s (осталось 1 день)",
+                                "Notification sent to %s user (1 days left)",
                                 user.id
                             )
 
@@ -64,7 +67,7 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                                 CheckSubServices.SUBSCRIBE_EXPIRED
                             )
                             logger.info(
-                                "Отправлено уведомление пользователю %s (подписка истекла)",
+                                "Notification sent to %s user (subscribe expired)",
                                 user.id
                             )
 
@@ -76,7 +79,7 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                                     user_id=user.id
                                 )
                                 logger.info(
-                                    "Пользователь %s удален из канала (подписка истекла %s дней назад)",
+                                    "User %s has been removed from channel (subscribe expired %s days ago)",
                                     user.id,
                                     abs(days_left)
                                 )
@@ -84,17 +87,17 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                                 error_msg = str(ban_error)
                                 if "CHAT_ADMIN_REQUIRED" in error_msg:
                                     logger.error(
-                                        "Бот не имеет прав администратора для бана пользователя %s",
+                                        "Bot got no sufficient rights to user %s ban",
                                         user.id
                                     )
                                 elif "USER_NOT_PARTICIPANT" in error_msg:
                                     logger.info(
-                                        "Пользователь %s уже не является участником канала",
+                                        "User %s is already removed",
                                         user.id
                                     )
                                 else:
                                     logger.error(
-                                        "Ошибка при удалении пользователя %s из канала: %s",
+                                        "User %s removed error: %s",
                                         user.id,
                                         ban_error
                                     )
@@ -103,29 +106,29 @@ async def subscription_checker(bot: Bot, db: DatabaseHelper):
                         error_msg = str(user_error)
                         if "chat not found" in error_msg.lower() or "user not found" in error_msg.lower():
                             logger.warning(
-                                "Не удалось отправить сообщение пользователю %s: пользователь не найден",
+                                "Cannot sent message to %s user: user not found",
                                 user.id
                             )
                         elif "blocked" in error_msg.lower():
                             logger.warning(
-                                "Пользователь %s заблокировал бота",
+                                "Bot has been blocked by user: %s",
                                 user.id
                             )
                         else:
                             logger.error(
-                                "Ошибка при обработке пользователя %s: %s",
+                                "Processing error: %s",
                                 user.id,
                                 user_error
                             )
 
             except Exception as db_error:
                 logger.error(
-                    "Ошибка при выборке пользователей из БД: %s",
+                    "Database error: %s",
                     db_error
                 )
 
     except Exception as error:
         logger.error(
-            "Критическая ошибка в subscription_checker: %s",
+            "Critical error: %s",
             error
         )
