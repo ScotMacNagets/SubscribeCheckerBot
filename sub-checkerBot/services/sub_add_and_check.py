@@ -133,114 +133,111 @@ async def subscription_checker(db: DatabaseHelper):
     Запускается в фоновом режиме и проверяет подписки раз в день.
     """
     logger.info("Запуск проверки подписок")
-    while True:
-        try:
-            today = datetime.datetime.now(datetime.timezone.utc).date()
 
-            async with db.session_factory() as session:
-                try:
-                    result = await session.execute(
-                        select(User).where(User.subscription_end != None)
-                    )
-                    users = result.scalars().all()
+    try:
+        today = datetime.datetime.now(datetime.timezone.utc).date()
 
-                    logger.info(f"Проверка подписок для {len(users)} пользователей")
+        async with db.session_factory() as session:
+            try:
+                result = await session.execute(
+                    select(User).where(User.subscription_end != None)
+                )
+                users = result.scalars().all()
 
-                    for user in users:
-                        days_left = (user.subscription_end - today).days
+                logger.info(f"Проверка подписок для {len(users)} пользователей")
 
-                        try:
-                            if days_left == 3:
-                                await bot.send_message(
-                                    user.id,
-                                    "⏰ Ваша подписка заканчивается через 3 дня! Продлите её, чтобы не потерять доступ."
+                for user in users:
+                    days_left = (user.subscription_end - today).days
+
+                    try:
+                        if days_left == 3:
+                            await bot.send_message(
+                                user.id,
+                                "⏰ Ваша подписка заканчивается через 3 дня! Продлите её, чтобы не потерять доступ."
+                            )
+                            logger.info(
+                                "Отправлено уведомление пользователю %s (осталось 3 дня)",
+                                user.id
+                            )
+
+                        elif days_left == 1:
+                            await bot.send_message(
+                                user.id,
+                                "⚠️ Ваша подписка заканчивается завтра! Продлите её сейчас."
+                            )
+                            logger.info(
+                                "Отправлено уведомление пользователю %s (осталось 1 день)",
+                                user.id
+                            )
+
+                        elif days_left == 0:
+                            await bot.send_message(
+                                user.id,
+                                "❌ Ваша подписка истекла сегодня. Доступ к каналу будет закрыт."
+                            )
+                            logger.info(
+                                "Отправлено уведомление пользователю %s (подписка истекла)",
+                                user.id
+                            )
+
+                        elif days_left < 0:
+                            # Удаляем пользователя из канала
+                            try:
+                                await bot.ban_chat_member(
+                                    chat_id=settings.channel.chan_id,
+                                    user_id=user.id
                                 )
                                 logger.info(
-                                    "Отправлено уведомление пользователю %s (осталось 3 дня)",
-                                    user.id
-                                )
-                            
-                            elif days_left == 1:
-                                await bot.send_message(
+                                    "Пользователь %s удален из канала (подписка истекла %s дней назад)",
                                     user.id,
-                                    "⚠️ Ваша подписка заканчивается завтра! Продлите её сейчас."
+                                    abs(days_left)
                                 )
-                                logger.info(
-                                    "Отправлено уведомление пользователю %s (осталось 1 день)",
-                                    user.id
-                                )
-                            
-                            elif days_left == 0:
-                                await bot.send_message(
-                                    user.id,
-                                    "❌ Ваша подписка истекла сегодня. Доступ к каналу будет закрыт."
-                                )
-                                logger.info(
-                                    "Отправлено уведомление пользователю %s (подписка истекла)",
-                                    user.id
-                                )
-                            
-                            elif days_left < 0:
-                                # Удаляем пользователя из канала
-                                try:
-                                    await bot.ban_chat_member(
-                                        chat_id=settings.channel.chan_id,
-                                        user_id=user.id
+                            except Exception as ban_error:
+                                error_msg = str(ban_error)
+                                if "CHAT_ADMIN_REQUIRED" in error_msg:
+                                    logger.error(
+                                        "Бот не имеет прав администратора для бана пользователя %s",
+                                        user.id
                                     )
+                                elif "USER_NOT_PARTICIPANT" in error_msg:
                                     logger.info(
-                                        "Пользователь %s удален из канала (подписка истекла %s дней назад)",
-                                        user.id,
-                                        abs(days_left)
+                                        "Пользователь %s уже не является участником канала",
+                                        user.id
                                     )
-                                except Exception as ban_error:
-                                    error_msg = str(ban_error)
-                                    if "CHAT_ADMIN_REQUIRED" in error_msg:
-                                        logger.error(
-                                            "Бот не имеет прав администратора для бана пользователя %s",
-                                            user.id
-                                        )
-                                    elif "USER_NOT_PARTICIPANT" in error_msg:
-                                        logger.info(
-                                            "Пользователь %s уже не является участником канала",
-                                            user.id
-                                        )
-                                    else:
-                                        logger.error(
-                                            "Ошибка при удалении пользователя %s из канала: %s",
-                                            user.id,
-                                            ban_error
-                                        )
-                        
-                        except Exception as user_error:
-                            error_msg = str(user_error)
-                            if "chat not found" in error_msg.lower() or "user not found" in error_msg.lower():
-                                logger.warning(
-                                    "Не удалось отправить сообщение пользователю %s: пользователь не найден",
-                                    user.id
-                                )
-                            elif "blocked" in error_msg.lower():
-                                logger.warning(
-                                    "Пользователь %s заблокировал бота",
-                                    user.id
-                                )
-                            else:
-                                logger.error(
-                                    "Ошибка при обработке пользователя %s: %s",
-                                    user.id,
-                                    user_error
-                                )
-                
-                except Exception as db_error:
-                    logger.error(
-                        "Ошибка при выборке пользователей из БД: %s",
-                        db_error
-                    )
-        
-        except Exception as e:
-            logger.error(
-                "Критическая ошибка в subscription_checker: %s",
-                e
-            )
-        
-        # Проверяем подписки раз в день
-        await asyncio.sleep(timedelta(days=1).total_seconds())
+                                else:
+                                    logger.error(
+                                        "Ошибка при удалении пользователя %s из канала: %s",
+                                        user.id,
+                                        ban_error
+                                    )
+
+                    except Exception as user_error:
+                        error_msg = str(user_error)
+                        if "chat not found" in error_msg.lower() or "user not found" in error_msg.lower():
+                            logger.warning(
+                                "Не удалось отправить сообщение пользователю %s: пользователь не найден",
+                                user.id
+                            )
+                        elif "blocked" in error_msg.lower():
+                            logger.warning(
+                                "Пользователь %s заблокировал бота",
+                                user.id
+                            )
+                        else:
+                            logger.error(
+                                "Ошибка при обработке пользователя %s: %s",
+                                user.id,
+                                user_error
+                            )
+
+            except Exception as db_error:
+                logger.error(
+                    "Ошибка при выборке пользователей из БД: %s",
+                    db_error
+                )
+
+    except Exception as e:
+        logger.error(
+            "Критическая ошибка в subscription_checker: %s",
+            e
+        )
