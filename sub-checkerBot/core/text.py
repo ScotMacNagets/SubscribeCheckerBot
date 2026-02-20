@@ -199,5 +199,11 @@ class AdminTariffKeyboard:
     CANCELED="⛔ Создание тарифа отменено"
 
 
+#REDIS
+
+class RedisAnswers:
+    TOO_MANY_REQUESTS="⏳ Слишком много запросов. Попробуйте позже."
+
+
 
 
