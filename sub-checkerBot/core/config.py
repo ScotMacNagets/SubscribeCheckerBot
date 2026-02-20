@@ -14,6 +14,20 @@ class ChannelConfig(BaseModel):
 class RunConfig(BaseModel):
     token: str
 
+class RateLimitConfig(BaseModel):
+    limit: int = 2
+    window: int = 10
+    key_prefix: str = "rl"
+
+class RedisDB(BaseModel):
+    rate_limiter: int = 0
+
+class RedisConfig(BaseModel):
+    host: str = "localhost"
+    port: int = 6379
+    db: RedisDB = RedisDB()
+    rate_limiter: RateLimitConfig = RateLimitConfig()
+
 class DatabaseConfig(BaseModel):
     url: PostgresDsn
 
@@ -30,5 +44,6 @@ class Settings(BaseSettings):
     channel: ChannelConfig
     payment: PaymentConfig
     admin: AdminConfig
+    redis: RedisConfig = RedisConfig()
 
 settings: Settings = Settings()
