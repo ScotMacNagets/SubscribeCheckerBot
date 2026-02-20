@@ -2,17 +2,26 @@ import asyncio
 import logging
 
 from aiogram import Dispatcher
+from redis.asyncio import Redis
 
 from core.bot_instance import bot
+from core.config import settings
 from core.logging_config import configure_logging
 from core.models.db_helper import db_helper
 from core.scheduler import create_scheduler
-from middleware import DBMiddleware
+from middleware import DBMiddleware, RateLimiterMiddleware
 from handlers import start_router, buy_subscription_router, check_sub_router, admin_router
 
 
 logger = logging.getLogger(__name__)
 scheduler = create_scheduler(bot, db_helper)
+
+redis_client = Redis(
+    host=settings.redis.host,
+    port=settings.redis.port,
+    db=settings.redis.db.rate_limiter,
+    decode_responses=True
+)
 
 dp = Dispatcher()
 
@@ -28,9 +37,27 @@ async def on_startup():
     await db_helper.create_tables()
     logger.info("DB table checked/created")
     
-    dp.update.middleware(DBMiddleware(db=db_helper))
+    dp.update.middleware(
+        DBMiddleware(
+            db=db_helper
+        )
+    )
+    logger.info("DBMiddleware connected")
+    dp.message.middleware(
+        RateLimiterMiddleware(
+            redis=redis_client,
+        )
+    )
+    logger.info("RateLimiter for message connected")
+    dp.callback_query.middleware(
+        RateLimiterMiddleware(
+            redis=redis_client,
+        )
+    )
+    logger.info("RateLimiter for callback_query connected")
+
     logger.info("Middleware connected")
-    
+
     # Запускаем фоновую задачу проверки подписок
     scheduler.start()
     logger.info("SubChecker background task started")
@@ -41,6 +68,10 @@ async def on_shutdown():
 
     await db_helper.dispose()
     logger.info("DB connection closed")
+
+
+    # await redis_client.close()
+    logger.info("Redis connection closing")
 
     scheduler.shutdown()
     logger.info("SubChecker background task shutdown")
