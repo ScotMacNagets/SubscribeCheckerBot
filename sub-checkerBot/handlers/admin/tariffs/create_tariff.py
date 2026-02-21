@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.callback_query(F.data == AdminTariffsActions.START_CREATING)
-async def stat_create_tariff(
+async def start_create_tariff(
         query: CallbackQuery,
         state: FSMContext,
 ):
