@@ -43,4 +43,16 @@ class AdminTariffsActions:
     CONFIRM="admin_tariffs_confirm"
     CANCEL="admin_tariffs_cancel"
 
+#Broadcast
+class AdminBroadcast:
+    #
+    BROADCAST_MENU="broadcast_menu"
+
+class AdminBroadcastActions:
+    START="start"
+    CANCEL = "cancel"
+
+    CONFIRM="confirm"
+
+
 
