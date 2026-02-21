@@ -141,6 +141,17 @@ class AdminAllTariffText:
 
     CREATING_ERROR="❌ Ошибка при создании тарифа, попробуйте позже"
 
+#Broadcast
+
+class AdminBroadcastText:
+    BROADCAST_MENU="📢 Меню рассылки"
+    SEND_MESSAGE="✍️ Отправьте сообщение для рассылки"
+
+    CONFIRM_MESSAGE="Вы уверены, что хотите отправить:\n\n{message}"
+
+    BROADCAST_SENT= "✅ Рассылка завершена"
+    BROADCAST_CANCELED="❌ Рассылка отменена"
+
 
 #BUTTONS:
 
@@ -197,6 +208,18 @@ class AdminTariffKeyboard:
 
     CONFIRMED="✅ Тариф успешно создан"
     CANCELED="⛔ Создание тарифа отменено"
+
+
+#admin_broadcast_keyboard
+
+class AdminBroadcastKeyboard:
+    START_BROADCAST="📢 Сделать рассылку"
+
+    # Confirm
+    CONFIRM = "✅ Подтвердить"
+    CANCEL = "⛔ Отменить"
+
+    WRITE_TEXT="✍️ Ввести текст"
 
 
 #REDIS
