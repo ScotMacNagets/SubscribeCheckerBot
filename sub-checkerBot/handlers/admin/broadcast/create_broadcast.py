@@ -2,7 +2,7 @@ import logging
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, PhotoSize
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_broadcast_callbackdata import BroadcastCB
@@ -43,12 +43,34 @@ async def get_broadcast_text(
 ):
     await state.update_data(message=message.text)
 
+    await state.set_state(BroadcastState.waiting_for_photo)
+
+    await message.answer(
+        text=AdminBroadcastText.SEND_PHOTO,
+    )
+
+
+@router.message(BroadcastState.waiting_for_photo)
+async def get_broadcast_text(
+        message: Message,
+        state: FSMContext,
+):
+    data = await state.get_data()
+    await state.update_data(photo=message.photo[-1].file_id)
+
     await state.set_state(BroadcastState.confirm)
+
+    await message.reply_photo(
+        photo=message.photo[-1].file_id,
+        caption=data['message'],
+
+    )
 
     await message.answer(
         text=AdminBroadcastText.CONFIRM_MESSAGE.format(message=message.text),
-        reply_markup=builder_confirm_broadcast_keyboard()
+        reply_markup=builder_confirm_broadcast_keyboard(),
     )
+
 
 
 @router.callback_query(BroadcastCB.filter(F.action == AdminBroadcastActions.CONFIRM))
@@ -59,6 +81,7 @@ async def confirm_broadcast(
 ):
     data = await state.get_data()
     text = data.get("message")
+    photo = data.get("photo")
 
     users = await get_all_users(
         session=session
@@ -66,7 +89,14 @@ async def confirm_broadcast(
 
     for user in users:
         try:
-            await bot.send_message(user.id, text)
+            if photo is None:
+                await bot.send_message(user.id, text)
+            else:
+                await bot.send_photo(
+                    user.id,
+                    photo,
+                    caption=text,
+                )
         except Exception as error:
             logger.error("Cannot sent message to user", exc_info=error)
 

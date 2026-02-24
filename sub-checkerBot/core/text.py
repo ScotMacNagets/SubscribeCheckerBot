@@ -146,8 +146,9 @@ class AdminAllTariffText:
 class AdminBroadcastText:
     BROADCAST_MENU="📢 Меню рассылки"
     SEND_MESSAGE="✍️ Отправьте сообщение для рассылки"
+    SEND_PHOTO="Теперь прикрепите картинку к рассылке😊"
 
-    CONFIRM_MESSAGE="Вы уверены, что хотите отправить:\n\n{message}"
+    CONFIRM_MESSAGE="🤔 Вы уверены, что хотите отправить сообщение в таком виде?"
 
     BROADCAST_SENT= "✅ Рассылка завершена"
     BROADCAST_CANCELED="❌ Рассылка отменена"

@@ -15,8 +15,8 @@ class RunConfig(BaseModel):
     token: str
 
 class RateLimitConfig(BaseModel):
-    limit: int = 2
-    window: int = 10
+    limit: int = 7
+    window: int = 15
     key_prefix: str = "rl"
 
 class RedisDB(BaseModel):
