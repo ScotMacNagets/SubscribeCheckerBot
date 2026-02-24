@@ -2,7 +2,7 @@ import logging
 
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, PhotoSize
+from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_broadcast_callbackdata import BroadcastCB
@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 
 @router.callback_query(F.data == AdminBroadcast.BROADCAST_MENU)
 async def open_broadcast_menu(query: CallbackQuery):
+    logger.info("Opened broadcast menu | by %s", query.from_user.id)
     await query.message.edit_text(
         text=AdminBroadcastText.BROADCAST_MENU,
-        reply_markup=build_broadcast_keyboard()
+        reply_markup=build_broadcast_keyboard(),
     )
 
 @router.callback_query(BroadcastCB.filter(F.action == AdminBroadcastActions.START))
@@ -30,6 +31,7 @@ async def broadcast_start(
         query: CallbackQuery,
         state: FSMContext
 ):
+    logger.info("Started creating broadcast | by %s", query.from_user.id)
     await state.set_state(BroadcastState.waiting_for_message)
     await query.message.edit_text(
         text=AdminBroadcastText.SEND_MESSAGE,
@@ -48,6 +50,8 @@ async def get_broadcast_text(
     await message.answer(
         text=AdminBroadcastText.SEND_PHOTO,
     )
+
+    logger.info("Send message | by %s", message.from_user.id)
 
 
 @router.message(BroadcastState.waiting_for_photo)
@@ -70,6 +74,7 @@ async def get_broadcast_text(
         text=AdminBroadcastText.CONFIRM_MESSAGE.format(message=message.text),
         reply_markup=builder_confirm_broadcast_keyboard(),
     )
+    logger.info("Send photo | by %s", message.from_user.id)
 
 
 
@@ -106,6 +111,8 @@ async def confirm_broadcast(
         reply_markup=back_to_admin_menu_keyboard()
     )
 
+    logger.info("Broadcast has been sent | by %s", query.from_user.id)
+
 
 @router.callback_query(BroadcastCB.filter(F.action == AdminBroadcastActions.CANCEL))
 async def cancel_broadcast(
@@ -117,3 +124,5 @@ async def cancel_broadcast(
         text=AdminBroadcastText.BROADCAST_CANCELED,
         reply_markup=back_to_admin_menu_keyboard()
     )
+
+    logger.info("Broadcast has been canceled | by %s", query.from_user.id)
