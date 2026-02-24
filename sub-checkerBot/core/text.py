@@ -66,6 +66,8 @@ class CheckSubHandlers:
 #Main
 class AdminMenu:
     MENU="🔧 Добро пожаловь в меню администратора\n\n Выберете, что хотите сделать:"
+    ACCESS_RESTRICTED="⛔ У вас нет доступа к админ-меню"
+    OPEN_ADMIN_MENU_ERROR="😥 Ошибка при открытии меню. Попробуйте позже"
 
 #Users
 class AdminUsersMenu:
