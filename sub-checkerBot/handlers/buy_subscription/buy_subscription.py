@@ -186,6 +186,7 @@ async def successful_payment(
         new_end_date = await add_or_update_subscription(
             session=session,
             user_id=user_id,
+            tariff_id=tariff.id,
             username=message.from_user.username,
             days=tariff.days,
         )

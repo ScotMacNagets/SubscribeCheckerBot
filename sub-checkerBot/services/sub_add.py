@@ -1,12 +1,12 @@
-import datetime
+from datetime import datetime, timezone
 import logging
 from datetime import timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, and_, update, values
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
-from core.models import User
+from core.models import User, Subscription
 from core.bot_instance import bot
 
 logger = logging.getLogger(__name__)
@@ -16,36 +16,57 @@ async def add_or_update_subscription(
         session: AsyncSession,
         user_id: int,
         username: str,
+        tariff_id: int,
         days: int = 3,
 
 ):
     #Добавляет или продлевает подписку
-    now = datetime.datetime.now().date()
+    today = datetime.now(timezone.utc)
 
-    result = await session.execute(select(User).where(User.id == user_id))
+    stmt = select(User).where(User.id == user_id)
+    result = await session.execute(stmt)
     user = result.scalars().first()
 
     if not user:
         user = User(
             id=user_id,
-            subscription_end=now + datetime.timedelta(days=days),
             username=username,
-
         )
         session.add(user)
+        await session.flush()
+
+    stmt = select(Subscription).where(
+        and_(
+            Subscription.user_id == user.id,
+            Subscription.is_active == True,
+            Subscription.expires_at > today,
+        )
+    )
+    result = await session.execute(stmt)
+    subscription = result.scalars().first()
+
+    if subscription:
+        subscription.expires_at += timedelta(days=days)
     else:
-        if user.subscription_end is not None and user.subscription_end > now:
-            user.subscription_end += timedelta(days=days)
-        else:
-            user.subscription_end = now + timedelta(days=days)
+        await session.execute(
+            update(Subscription)
+            .where(Subscription.user_id == user.id)
+            .values(is_active=False)
+        )
 
-    session.add(user)
+        subscription = Subscription(
+            user_id=user.id,
+            tariff_id=tariff_id,
+            started_at=today,
+            expires_at=today+timedelta(days=days),
+            is_active=True,
+        )
+        session.add(subscription)
+
     await session.commit()
-    await session.refresh(user)
-    new_end_date = user.subscription_end
-    return new_end_date
+    await session.refresh(subscription)
 
-
+    return subscription.expires_at
 async def add_user_to_channel(user_id: int) -> bool:
     """
     Добавляет пользователя в закрытый канал.
@@ -100,7 +121,7 @@ async def create_channel_invite_link(user_id: int | None = None) -> str | None:
     с правом "Invite Users".
     """
     try:
-        now_utc = datetime.datetime.now(datetime.timezone.utc)
+        now_utc = datetime.now(timezone.utc)
         invite = await bot.create_chat_invite_link(
             chat_id=settings.channel.chan_id,
             name=f"sub_invite_{user_id}" if user_id else "sub_invite",
