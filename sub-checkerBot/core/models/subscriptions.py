@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -17,8 +17,14 @@ class Subscription(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     tariff_id: Mapped[int] = mapped_column(ForeignKey("tariffs.id"))
 
-    started_at: Mapped[datetime]
-    expires_at: Mapped[datetime]
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
 
     is_active: Mapped[bool] = mapped_column(default=True)
 
