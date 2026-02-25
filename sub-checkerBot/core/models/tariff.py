@@ -13,3 +13,5 @@ class Tariff(Base):
     emoji: Mapped[str | None]
     is_active: Mapped[bool | None] = mapped_column(default=True)
     sort_order: Mapped[int] = mapped_column(default=0)
+
+
