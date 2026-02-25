@@ -1,134 +1,85 @@
-import datetime
+from datetime import datetime, timezone
 
 from aiogram import Bot
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from core.config import settings
-from core.models import User
+from core.models import User, Subscription
 from core.models.db_helper import DatabaseHelper
 from core.text import CheckSubServices
 from services.sub_add import logger
 
 
 async def subscription_checker(bot: Bot, db: DatabaseHelper):
-    """
-    Проверка подписок и уведомления пользователей.
-    Запускается в фоновом режиме и проверяет подписки раз в день.
-    """
-    logger.info("Subscription checker started")
+    now = datetime.now(timezone.utc)
 
-    try:
-        today = datetime.datetime.now(datetime.timezone.utc).date()
+    logger.info(f"Subscription checker started at %s", now.isoformat())
+    async with db.session_factory() as session:
+        try:
+            result = await session.execute(
+                select(Subscription)
+                .where(Subscription.is_active == True)
+                .options(selectinload(Subscription.user))
+            )
 
-        async with db.session_factory() as session:
-            try:
-                result = await session.execute(
-                    select(User).where(
-                        User.subscription_end.between(
-                            today - datetime.timedelta(days=1),
-                            today + datetime.timedelta(days=3)
-                        ),
-                    )
-                )
-                users = result.scalars().all()
+            subs = result.scalars().all()
+            logger.info("Checking %d active subscriptions", len(subs))
 
-                logger.info(
-                    "Subscription checking for %s users",
-                    len(users)
-                )
+            for sub in subs:
+                user = sub.user
+                days_left = (sub.expires_at.date() - now.date()).days
 
-                for user in users:
-                    days_left = (user.subscription_end - today).days
+                try:
+                    if days_left == 3 and not sub.notified_3_days:
+                        await bot.send_message(user.id, CheckSubServices.THREE_DAYS_LEFT)
+                        sub.notified_3_days = True
+                        logger.info("Notification sent to user %s: 3 days left", user.id)
 
-                    try:
-                        if days_left == 3:
-                            await bot.send_message(
-                                user.id,
-                                CheckSubServices.THREE_DAYS_LEFT
+                    elif days_left == 1 and not sub.notified_1_days:
+                        await bot.send_message(user.id, CheckSubServices.ONE_DAY_LEFT)
+                        sub.notified_1_day = True
+                        logger.info("Notification sent to user %s: 1 day left", user.id)
+
+                    elif days_left == 0 and not sub.notified_expired:
+                        await bot.send_message(user.id, CheckSubServices.SUBSCRIBE_EXPIRED)
+                        sub.notified_expired = True
+                        logger.info("Notification sent to user %s: subscription expired today", user.id)
+
+
+                    elif days_left < 0:
+                        sub.is_active = False
+                        logger.info("Deactivating subscription for user %s (expired %d days ago)", user.id, abs(days_left))
+
+                        active_check = await session.execute(
+                            select(Subscription).where(
+                                Subscription.user_id == user.id,
+                                Subscription.is_active == True,
+                                Subscription.expires_at > now,
                             )
-                            logger.info(
-                                "Notification sent to %s user (3 days left)",
-                                user.id
-                            )
+                        )
 
-                        elif days_left == 1:
-                            await bot.send_message(
-                                user.id,
-                                CheckSubServices.ONE_DAY_LEFT
-                            )
-                            logger.info(
-                                "Notification sent to %s user (1 days left)",
-                                user.id
-                            )
-
-                        elif days_left == 0:
-                            await bot.send_message(
-                                user.id,
-                                CheckSubServices.SUBSCRIBE_EXPIRED
-                            )
-                            logger.info(
-                                "Notification sent to %s user (subscribe expired)",
-                                user.id
-                            )
-
-                        elif days_left < 0:
-                            # Удаляем пользователя из канала
+                        if not active_check.scalars().first():
                             try:
                                 await bot.ban_chat_member(
                                     chat_id=settings.channel.chan_id,
-                                    user_id=user.id
+                                    user_id=user.id,
                                 )
-                                logger.info(
-                                    "User %s has been removed from channel (subscribe expired %s days ago)",
-                                    user.id,
-                                    abs(days_left)
-                                )
+                                logger.info("User %s banned from channel due to expired subscription", user.id)
                             except Exception as ban_error:
                                 error_msg = str(ban_error)
                                 if "CHAT_ADMIN_REQUIRED" in error_msg:
-                                    logger.error(
-                                        "Bot got no sufficient rights to user %s ban",
-                                        user.id
-                                    )
+                                    logger.error("Bot has no rights to ban user %s", user.id)
                                 elif "USER_NOT_PARTICIPANT" in error_msg:
-                                    logger.info(
-                                        "User %s is already removed",
-                                        user.id
-                                    )
+                                    logger.info("User %s already removed from channel", user.id)
                                 else:
-                                    logger.error(
-                                        "User %s removed error: %s",
-                                        user.id,
-                                        ban_error
-                                    )
+                                    logger.error("Error banning user %s: %s", user.id, ban_error)
+                except Exception as e:
+                    logger.error("Error processing subscription check for user %s", user.id, exc_info=e)
+            await session.commit()
+            logger.info("Subscription checker completed successfully")
+        except Exception as db_error:
+            logger.error("DB error during subscription check", exc_info=db_error)
 
-                    except Exception as user_error:
-                        error_msg = str(user_error)
-                        if "chat not found" in error_msg.lower() or "user not found" in error_msg.lower():
-                            logger.warning(
-                                "Cannot sent message to %s user: user not found",
-                                user.id
-                            )
-                        elif "blocked" in error_msg.lower():
-                            logger.warning(
-                                "Bot has been blocked by user: %s",
-                                user.id
-                            )
-                        else:
-                            logger.error(
-                                "Processing error: %s",
-                                user.id,
-                                user_error
-                            )
 
-            except Exception as db_error:
-                logger.error(
-                    "Database error: %s",
-                    db_error
-                )
 
-    except Exception as error:
-        logger.error(
-            "Critical error: %s",
-            error
-        )
