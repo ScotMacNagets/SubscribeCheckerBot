@@ -4,7 +4,24 @@ from core.models import User
 from core.text import AdminUsersHelpersText
 
 
-def format_user_short(user: User) -> str:
+async def _get_user_sub(
+        user: User,
+        session: AsyncSession,
+) -> Subscription:
+    now = datetime.now()
+    stmt = select(Subscription).where(
+        and_(
+            Subscription.user_id == user.id,
+            Subscription.expires_at > now,
+            Subscription.is_active == True,
+        )
+    )
+    result = await session.execute(stmt)
+
+    subscription = result.scalars().one_or_none()
+    return subscription
+
+async def format_user_short(session: AsyncSession, user: User) -> str:
     status: str
     if user.subscription_end:
         days_left = (user.subscription_end - date.today()).days
