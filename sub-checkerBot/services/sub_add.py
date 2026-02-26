@@ -46,7 +46,13 @@ async def add_or_update_subscription(
     subscription = result.scalars().first()
 
     if subscription:
-        subscription.expires_at += timedelta(days=days)
+        current_expire = subscription.expires_at.astimezone(timezone.utc)
+        new_expire = current_expire + timedelta(days=days)
+        subscription.expires_at = new_expire.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        subscription.notified_3_days = False
+        subscription.notified_1_day = False
+        subscription.notified_expired = False
     else:
         await session.execute(
             update(Subscription)
@@ -58,7 +64,7 @@ async def add_or_update_subscription(
             user_id=user.id,
             tariff_id=tariff_id,
             started_at=today,
-            expires_at=today+timedelta(days=days),
+            expires_at=(today + timedelta(days=days)).replace(hour=0, minute=0, second=0, microsecond=0),
             is_active=True,
         )
         session.add(subscription)
@@ -67,6 +73,8 @@ async def add_or_update_subscription(
     await session.refresh(subscription)
 
     return subscription.expires_at
+
+
 async def add_user_to_channel(user_id: int) -> bool:
     """
     Добавляет пользователя в закрытый канал.
