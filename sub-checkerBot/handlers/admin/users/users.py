@@ -8,7 +8,7 @@ from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_user_callbackdata import AdminUserCB
-from core.text import AdminUsersMenu, AdminUserAction, AdminMenu
+from core.text import AdminUsersMenu, AdminUserAction
 from handlers.admin.helpers import open_admin_menu_helper
 from services.admin_users import render_user
 from handlers.admin.users.users_states import AdminUserStates
@@ -71,6 +71,7 @@ async def handle_user_search_by_id(
         username=username,
         target=message,
         reply_markup=build_admin_main_users_keyboard(),
+        session=session,
     )
     await state.clear()
 
@@ -97,7 +98,7 @@ async def extend_sub_for_user(
             username=callback_data.username,
             days=callback_data.days,
         )
-    except Exception as error:
+    except Exception:
         logger.exception(
             "Failed to extend subscription for %s | by %s",
             callback_data.username,
@@ -114,6 +115,7 @@ async def extend_sub_for_user(
     await render_user(
         user=user,
         username=callback_data.username,
+        session=session,
         target=query,
         is_callback=True,
         reply_markup=build_admin_main_users_keyboard(),
@@ -133,7 +135,7 @@ async def cancel_subscription(
     )
     if not callback_data.username:
         logger.error(
-            "Invalid data received for cancelation: %s | by %s",
+            "Invalid data received for cancellation: %s | by %s",
             callback_data.username,
             query.from_user.id,
         )
@@ -158,6 +160,7 @@ async def cancel_subscription(
         target=query,
         is_callback=True,
         reply_markup=build_admin_main_users_keyboard(),
+        session=session,
     )
 
 
@@ -205,7 +208,14 @@ async def handle_new_end_date(
     raw = message.text.strip()
     today = date.today()
 
-    new_date = datetime.strptime(raw, "%d.%m.%Y").date()
+    try:
+        new_date = datetime.strptime(raw, "%d.%m.%Y").date()
+    except ValueError as error:
+        logger.error("Failed to convert date to datetime: %s", error)
+        await message.answer(
+            AdminUserAction.INCORRECT_DATA_FORMAT
+        )
+        return
 
     if new_date < today:
         await message.answer(
@@ -216,9 +226,6 @@ async def handle_new_end_date(
         "Invalid data format: %s | by %s",
         raw,
         message.from_user.id,
-    )
-    await message.answer(
-        AdminUserAction.INCORRECT_DATA_FORMAT
     )
 
     data = await state.get_data()
@@ -253,6 +260,7 @@ async def handle_new_end_date(
         username=username,
         target=message,
         reply_markup=build_admin_main_users_keyboard(),
+        session=session,
     )
 
 
@@ -284,7 +292,8 @@ async def delete_user(
         target=query,
         is_callback=True,
         short=True,
-        reply_markup=build_admin_main_users_keyboard()
+        reply_markup=build_admin_main_users_keyboard(),
+        session=session,
     )
 
 
