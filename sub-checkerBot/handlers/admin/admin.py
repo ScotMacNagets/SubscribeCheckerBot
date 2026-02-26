@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 @router.message(Command(CommandText.ADMIN_MENU))
 async def open_admin_menu(message: Message):
     user_id = message.from_user.id
+    username = message.from_user.username
 
-    if user_id != settings.admin.support or user_id != settings.admin.super_user:
+    if username != settings.admin.support or username != settings.admin.super_user:
         logger.warning("User with id: %s tried to access admin menu", user_id)
         await message.answer(
             text=AdminMenu.ACCESS_RESTRICTED
