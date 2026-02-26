@@ -126,9 +126,15 @@ async def render_user(
         return
 
     if short:
-        text = format_user_short(user)
+        text = await format_user_short(
+            user=user,
+            session=session,
+        )
     else:
-        text = format_user_detail(user)
+        text = await format_user_detail(
+            user=user,
+            session=session,
+        )
 
     if isinstance(target, CallbackQuery):
         method = target.message.edit_text

@@ -23,12 +23,12 @@ async def _get_user_sub(
 
 async def format_user_short(session: AsyncSession, user: User) -> str:
     status: str
-    if user.subscription_end:
-        days_left = (user.subscription_end - date.today()).days
+    subscription: Subscription = await _get_user_sub(user, session)
+    if subscription:
         days_left = (subscription.expires_at - datetime.now()).days
         status = (
             AdminUsersHelpersText.FORMAT_SHORT.format(
-                date=user.subscription_end.strftime('%d.%m.%Y'),
+                date=subscription.expires_at.strftime('%d.%m.%Y'),
                 days_left=abs(days_left),
             ),
         )
@@ -39,7 +39,9 @@ async def format_user_short(session: AsyncSession, user: User) -> str:
     return f"ID: {user.id} | {username} | {status}"
 
 
-def format_user_detail(user: User) -> str:
+async def format_user_detail(session: AsyncSession, user: User) -> str:
+    subscription: Subscription = await _get_user_sub(user, session)
+
     lines = [
         AdminUsersHelpersText.FORMAT_DETAIL.format(
             id=user.id,
@@ -60,7 +62,7 @@ def format_user_detail(user: User) -> str:
         lines.append(
             AdminUsersHelpersText.SUB_DESC.format(
                 status=status,
-                date=user.subscription_end.strftime('%d.%m.%Y'),
+                date=subscription.expires_at.strftime('%d.%m.%Y'),
                 days_left=abs(days_left),
             )
         ),
