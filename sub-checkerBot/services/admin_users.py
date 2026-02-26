@@ -31,6 +31,27 @@ async def get_user_by_username(session: AsyncSession, username: str) -> Optional
         )
         return None
 
+async def _get_user_sub(
+        session: AsyncSession,
+        user: User,
+) -> Optional[Subscription]:
+    now = datetime.now()
+    try:
+        stmt = select(Subscription).where(
+            and_(
+                Subscription.user_id == user.id,
+                Subscription.is_active == True,
+                Subscription.expires_at > now,
+            )
+        )
+        result = await session.execute(stmt)
+        subscription = result.scalars().one_or_none()
+        return subscription
+    except ValueError as error:
+        logger.error(
+            "Cannot load subscription for user with id %s: %s", user.id, error
+        )
+
 
 async def extend_subscription(
     session: AsyncSession,
