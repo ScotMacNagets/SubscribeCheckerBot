@@ -1,11 +1,11 @@
-from datetime import date
+from datetime import datetime
 
 from core.text import CheckSubHandlers
 
 
-def self_check_text(subscription_end: date | None) -> str:
+def self_check_text(subscription_end: datetime | None) -> str:
     if subscription_end:
-        days_left = (subscription_end - date.today()).days
+        days_left = (subscription_end - datetime.today()).days
         end_date = subscription_end.strftime('%d.%m.%Y')
         if days_left < 0:
             return (

@@ -9,6 +9,7 @@ from core.models import User
 async def get_all_users(session: AsyncSession):
     today = date.today()
     stmt = select(User).where(User.subscription_end >= today)
+    now = datetime.now()
     result = await session.execute(stmt)
     users = result.scalars().all()
     return users

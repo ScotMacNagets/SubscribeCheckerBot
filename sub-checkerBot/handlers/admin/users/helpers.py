@@ -25,6 +25,7 @@ async def format_user_short(session: AsyncSession, user: User) -> str:
     status: str
     if user.subscription_end:
         days_left = (user.subscription_end - date.today()).days
+        days_left = (subscription.expires_at - datetime.now()).days
         status = (
             AdminUsersHelpersText.FORMAT_SHORT.format(
                 date=user.subscription_end.strftime('%d.%m.%Y'),
@@ -47,8 +48,8 @@ def format_user_detail(user: User) -> str:
         ),
     ]
 
-    if user.subscription_end:
-        days_left = (user.subscription_end - date.today()).days
+    if subscription:
+        days_left = (subscription.expires_at - datetime.now()).days
 
         status = (
             AdminUsersHelpersText.STATUS_ACTIVE
