@@ -1,15 +1,19 @@
-from datetime import date
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
-from core.models import User
+from core.models import User, Subscription
 
 
 async def get_all_users(session: AsyncSession):
-    today = date.today()
-    stmt = select(User).where(User.subscription_end >= today)
     now = datetime.now()
+    stmt = select(User).join(User.subscriptions).where(
+        Subscription.expires_at > now,
+        Subscription.is_active == True,
+    ).distinct()
+
     result = await session.execute(stmt)
     users = result.scalars().all()
     return users
