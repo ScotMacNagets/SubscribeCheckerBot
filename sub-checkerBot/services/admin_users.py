@@ -1,12 +1,12 @@
 import logging
-from datetime import date, timedelta
+from datetime import timedelta, datetime
 from typing import Optional
 
 from aiogram.types import CallbackQuery, Message
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import User
+from core.models import User, Subscription
 from core.text import AdminUsersHelpersText
 from handlers.admin.users.helpers import format_user_short, format_user_detail
 from keyboards.admin_users_keyboard import build_user_actions_keyboard
@@ -15,9 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 async def get_user_by_username(session: AsyncSession, username: str) -> Optional[User]:
-    """
-    Возвращает пользователя по username или None, если не найден.
-    """
     try:
         stmt = select(User).where(User.username == username)
         result = await session.execute(stmt)
@@ -58,47 +55,57 @@ async def extend_subscription(
     username: str,
     days: int,
 ) -> Optional[User]:
-    """
-    Продлевает подписку на указанное количество дней.
-    Если пользователя нет — возвращает None.
-    """
-    user = await get_user_by_username(session=session, username=username)
-    if not user:
+    user = await get_user_by_username(
+        session=session,
+        username=username,
+    )
+    active_subscription = await _get_user_sub(
+        session=session,
+        user=user,
+    )
+
+
+    if not active_subscription:
         return None
 
-    today = date.today()
-    if user.subscription_end is not None and user.subscription_end >= today:
-        base_date = user.subscription_end
-    else:
-        base_date = today
+    active_subscription.expires_at = active_subscription.expires_at + timedelta(days=days)
 
-    user.subscription_end = base_date + timedelta(days=days)
-
-    session.add(user)
+    session.add(active_subscription)
     await session.commit()
-    await session.refresh(user)
+    await session.refresh(active_subscription)
     return user
+
+
+
 
 
 async def set_subscription_end(
     session: AsyncSession,
     username: str,
-    new_end: date | None = None,
+    new_end: datetime | None = None,
     cancel: bool = False,
 ) -> Optional[User]:
-    """
-    Устанавливает дату окончания подписки (может быть None).
-    """
-    user = await get_user_by_username(session=session, username=username)
-    if not user:
+    user = await get_user_by_username(
+        session=session,
+        username=username,
+    )
+    active_subscription = await _get_user_sub(
+        session=session,
+        user=user,
+    )
+
+    if not active_subscription:
         return None
 
-    user.subscription_end = new_end
     if cancel:
-        user.subscription_end = None
-    session.add(user)
+        active_subscription.is_active = False
+    else:
+        active_subscription.expires_at = new_end
+
+    session.add(active_subscription)
     await session.commit()
-    await session.refresh(user)
+    await session.refresh(active_subscription)
+
     return user
 
 
@@ -122,6 +129,7 @@ async def delete_user(
 async def render_user(
         username: str,
         target: CallbackQuery | Message,
+        session: AsyncSession,
         user: User = None,
         is_callback: bool = False,
         delete: bool = False,
