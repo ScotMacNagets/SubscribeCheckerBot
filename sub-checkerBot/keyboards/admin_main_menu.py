@@ -14,21 +14,21 @@ def build_main_menu(username: str) -> InlineKeyboardMarkup:
         callback_data=AdminUsers.USERS_SEARCH,
     )
 
-    builder.button(
-        text=AdminTariffMenu.TARIFF_MENU,
-        callback_data=AdminTariffs.TARIFFS_MENU,
-    )
-
-    builder.button(
-        text=AdminBroadcastKeyboard.START_BROADCAST,
-        callback_data=AdminBroadcast.BROADCAST_MENU,
-    )
-
     if username == settings.admin.super_user:
+
+        builder.button(
+            text=AdminTariffMenu.TARIFF_MENU,
+            callback_data=AdminTariffs.TARIFFS_MENU,
+        )
+
+        builder.button(
+            text=AdminBroadcastKeyboard.START_BROADCAST,
+            callback_data=AdminBroadcast.BROADCAST_MENU,
+        )
+
         builder.button(
             text=AdminTariffKeyboard.START_CREATING,
             callback_data=AdminTariffsActions.START_CREATING,
         )
-
     builder.adjust(1)
     return builder.as_markup()
