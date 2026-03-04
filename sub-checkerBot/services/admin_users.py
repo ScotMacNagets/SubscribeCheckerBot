@@ -89,22 +89,22 @@ async def set_subscription_end(
         session=session,
         username=username,
     )
-    active_subscription = await _get_user_sub(
+    subscription = await _get_user_sub(
         session=session,
         user=user,
     )
 
-    if not active_subscription:
+    if not subscription:
         return None
 
     if cancel:
-        active_subscription.is_active = False
+        subscription.is_active = False
     else:
-        active_subscription.expires_at = new_end
+        subscription.expires_at = new_end
 
-    session.add(active_subscription)
+    session.add(subscription)
     await session.commit()
-    await session.refresh(active_subscription)
+    await session.refresh(subscription)
 
     return user
 
