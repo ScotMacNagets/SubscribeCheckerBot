@@ -106,6 +106,20 @@ async def extend_sub_for_user(
         )
         raise
 
+    if user is None:
+        logger.exception(
+            "Failed to extend subscription for %s | by %s",
+            callback_data.username,
+            query.from_user.id,
+        )
+        await query.message.edit_text(
+            text=AdminUserAction.FAILED_TO_EXTEND_SUB,
+            reply_markup=build_admin_main_users_keyboard()
+        )
+        await query.answer()
+        return
+
+
     logger.info(
         "User subscription extended successfully for %s | by %s",
         callback_data.username,
@@ -245,6 +259,18 @@ async def handle_new_end_date(
         username=username,
         new_end=new_date,
     )
+
+    if user is None:
+        logger.exception(
+            "Failed to extend subscription for %s | by %s",
+            message.from_user.username,
+            message.from_user.id,
+        )
+        await message.edit_text(
+            text=AdminUserAction.FAILED_TO_EXTEND_SUB,
+            reply_markup=build_admin_main_users_keyboard()
+        )
+        return
 
     logger.info(
         "Successfully set new date for %s | by %s",
