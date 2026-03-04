@@ -69,13 +69,13 @@ def build_admin_tariff_detail_keyboard(tariff: Tariff) -> InlineKeyboardMarkup:
             tariff_id=tariff.id,
         ).pack(),
     )
-    builder.button(
-        text=AdminTariffKeyboard.DELETE,
-        callback_data=AdminTariffCB(
-            action=AdminTariffsActions.DELETE,
-            tariff_id=tariff.id,
-        ).pack(),
-    )
+    # builder.button(
+    #     text=AdminTariffKeyboard.DELETE,
+    #     callback_data=AdminTariffCB(
+    #         action=AdminTariffsActions.DELETE,
+    #         tariff_id=tariff.id,
+    #     ).pack(),
+    # )
     builder.button(
         text=AdminTariffKeyboard.BACK_TO_THE_LIST,
         callback_data=AdminTariffCB(
@@ -84,7 +84,7 @@ def build_admin_tariff_detail_keyboard(tariff: Tariff) -> InlineKeyboardMarkup:
         ).pack(),
     )
 
-    builder.adjust(2, 1, 1)
+    builder.adjust(2, 1)
     return builder.as_markup()
 
 

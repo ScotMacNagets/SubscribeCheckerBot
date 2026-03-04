@@ -100,30 +100,30 @@ async def toggle_tariff_hot(
     await show_tariff_detail(query=query, callback_data=callback_data, session=session)
 
 
-@router.callback_query(AdminTariffCB.filter(F.action == AdminTariffsActions.DELETE))
-async def delete_tariff(
-    query: CallbackQuery,
-    callback_data: AdminTariffCB,
-    session: AsyncSession,
-):
-    logger.info("Requested tariff deleting | by %s", query.from_user.id)
-    tariff = await get_specific_tariff(
-        session=session,
-        callback_data=callback_data,
-        query=query,
-        deleting=True
-    )
-
-    await session.delete(tariff)
-    await session.commit()
-
-    logger.info("Tariff successfully deleted | by %s", query.from_user.id)
-
-    await render_tariffs_list(
-        query=query,
-        session=session,
-        text=AdminTariffMenu.AFTER_DELETING
-    )
+# @router.callback_query(AdminTariffCB.filter(F.action == AdminTariffsActions.DELETE))
+# async def delete_tariff(
+#     query: CallbackQuery,
+#     callback_data: AdminTariffCB,
+#     session: AsyncSession,
+# ):
+#     logger.info("Requested tariff deleting | by %s", query.from_user.id)
+#     tariff = await get_specific_tariff(
+#         session=session,
+#         callback_data=callback_data,
+#         query=query,
+#         deleting=True
+#     )
+#
+#     await session.delete(tariff)
+#     await session.commit()
+#
+#     logger.info("Tariff successfully deleted | by %s", query.from_user.id)
+#
+#     await render_tariffs_list(
+#         query=query,
+#         session=session,
+#         text=AdminTariffMenu.AFTER_DELETING
+#     )
 
 
 @router.callback_query(AdminTariffCB.filter(F.action == AdminTariffsActions.BACK_TO_THE_LIST))
