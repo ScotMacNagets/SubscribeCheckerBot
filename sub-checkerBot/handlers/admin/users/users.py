@@ -56,10 +56,12 @@ async def handle_user_search_by_id(
     user = await admin_users_service.get_user_by_username(session=session, username=username)
 
     if not user:
-        await message.edit_text(
+        await message.answer(
             text=AdminUserAction.USER_NOT_FOUND,
         )
-        await back_to_users_admin_menu(message=message)
+        await back_to_users_admin_menu(
+            message=message,
+        )
         logger.info("User %s not found | by %s", username, message.from_user.id)
         return
 
@@ -162,6 +164,16 @@ async def cancel_subscription(
         cancel=True,
     )
 
+    if not user:
+        logger.error(
+            "Failed to cancel subscription for %s | by %s",
+        )
+        await query.message.edit_text(
+            text=AdminUserAction.SUB_ALREADY_CANCELLED,
+            reply_markup=build_admin_main_users_keyboard()
+        )
+        return
+
     logger.info(
         "User subscription cancelled successfully for %s | by %s",
         callback_data.username,
@@ -220,7 +232,7 @@ async def handle_new_end_date(
 ):
 
     raw = message.text.strip()
-    today = datetime.now(timezone.utc)
+    today = datetime.now()
 
     try:
         new_date = datetime.strptime(raw, "%d.%m.%Y")
@@ -237,7 +249,7 @@ async def handle_new_end_date(
         )
         return
     logger.warning(
-        "Invalid data format: %s | by %s",
+        "Past Date: %s | by %s",
         raw,
         message.from_user.id,
     )
@@ -266,7 +278,7 @@ async def handle_new_end_date(
             message.from_user.username,
             message.from_user.id,
         )
-        await message.edit_text(
+        await message.answer(
             text=AdminUserAction.FAILED_TO_EXTEND_SUB,
             reply_markup=build_admin_main_users_keyboard()
         )
@@ -324,9 +336,8 @@ async def handle_new_end_date(
 
 
 @router.callback_query(F.data == AdminUserActions.BACK_TO_USERS_ADMIN_MENU)
-async def back_to_users_admin_menu(query: CallbackQuery):
-    await query.answer()
-    await query.message.edit_text(
+async def back_to_users_admin_menu(message: Message):
+    await message.answer(
         text=AdminUsersMenu.USER_MANAGE_MENU,
         reply_markup=build_admin_main_users_keyboard(),
     )

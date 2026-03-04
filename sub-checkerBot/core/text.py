@@ -78,6 +78,7 @@ class AdminUserAction:
     INCORRECT_DATA="❌ Некорректные данные."
     USER_NOT_FOUND="❌ Ошибка системы, не удалось найти пользователя"
     EXTEND_FAILED="❌ Ошибка продления, попробуйте позже"
+    SUB_ALREADY_CANCELLED="❌ Подписка уже отсутствует"
     INCORRECT_DATA_FORMAT="❌ Некорректный формат даты. Используйте ДД.ММ.ГГГГ, например 25.12.2026."
     PAST_DATE="❌ Дата не может быть в прошлом. Введите корректную дату."
     CANNOT_IDENTIFY_USER="❌ Не удалось определить пользователя. Попробуйте снова через меню админа."
@@ -183,7 +184,6 @@ class AdminUsersKeyboard:
     EXTEND_DAYS="➕ +{days} дней"
     SET_THE_DATE="📅 Установить дату"
     CANCEL_SUB="✂ Отменить подписку"
-    DELETE_USER="🗑 Удалить пользователя"
     USERNAME_SEARCH="📂🔍 Поиск по нику"
     # DELETE_USER="🗑 Удалить пользователя"
 
