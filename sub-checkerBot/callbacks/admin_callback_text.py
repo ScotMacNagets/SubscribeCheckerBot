@@ -6,7 +6,7 @@ class AdminMain:
 #Users
 
 class AdminUsers:
-    HUMAN_RESOURCE = "admin_human_resource"
+    USERS_SEARCH = "admin_users_search"
     SEARCH_BY_USERNAME = "admin_users_search_id"
     USER_DETAIL_PREFIX = "admin_user_"  # admin_user_<user_id>
 

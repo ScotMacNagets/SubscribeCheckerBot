@@ -11,7 +11,7 @@ def build_main_menu(username: str) -> InlineKeyboardMarkup:
 
     builder.button(
         text=AdminUsersMenu.USER_MANAGE_MENU,
-        callback_data=AdminUsers.HUMAN_RESOURCE,
+        callback_data=AdminUsers.USERS_SEARCH,
     )
 
     builder.button(
