@@ -23,7 +23,7 @@ class RedisDB(BaseModel):
     rate_limiter: int = 0
 
 class RedisConfig(BaseModel):
-    host: str = "localhost"
+    host: str = "redis"
     port: int = 6379
     db: RedisDB = RedisDB()
     rate_limiter: RateLimitConfig = RateLimitConfig()
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
         case_sensitive=False,
         env_nested_delimiter="__",
         env_prefix="SUBSCRIBE__",
-        env_file=(".env.template", ".env"),
+        extra="ignore",
     )
 
     run: RunConfig
