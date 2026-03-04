@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
@@ -23,7 +23,7 @@ async def check_subscription(query: CallbackQuery, session: AsyncSession):
         subscription_end=sub_end,
     )
 
-    if not sub_end or (sub_end - datetime.today()).days < 0:
+    if not sub_end or (sub_end - datetime.now(timezone.utc)).days < 0:
         keyboard = build_renew_keyboard()
     else:
         keyboard = build_renew_keyboard(only_back=True)

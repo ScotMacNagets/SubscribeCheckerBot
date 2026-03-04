@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, date
+from datetime import datetime, timezone
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 router = Router()
 
-@router.callback_query(F.data == AdminUsers.HUMAN_RESOURCE)
+@router.callback_query(F.data == AdminUsers.USERS_SEARCH)
 async def users_main_menu(query: CallbackQuery):
     await query.answer()
     logger.info("Users menu opened | %s", query.from_user.id)
@@ -206,10 +206,10 @@ async def handle_new_end_date(
 ):
 
     raw = message.text.strip()
-    today = date.today()
+    today = datetime.now(timezone.utc)
 
     try:
-        new_date = datetime.strptime(raw, "%d.%m.%Y").date()
+        new_date = datetime.strptime(raw, "%d.%m.%Y")
     except ValueError as error:
         logger.error("Failed to convert date to datetime: %s", error)
         await message.answer(

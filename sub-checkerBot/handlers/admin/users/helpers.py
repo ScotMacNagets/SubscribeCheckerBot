@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime, timezone, timedelta
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,11 +28,11 @@ async def format_user_short(session: AsyncSession, user: User) -> str:
     status: str
     subscription: Subscription = await _get_user_sub(user, session)
     if subscription:
-        days_left = (subscription.expires_at - datetime.now()).days
+        days_left = (subscription.expires_at - datetime.now(timezone.utc)).days
         status = (
             AdminUsersHelpersText.FORMAT_SHORT.format(
                 date=subscription.expires_at.strftime('%d.%m.%Y'),
-                days_left=abs(days_left),
+                days_left=days_left,
             ),
         )
     else:
@@ -54,7 +54,7 @@ async def format_user_detail(session: AsyncSession, user: User) -> str:
     ]
 
     if subscription:
-        days_left = (subscription.expires_at - datetime.now()).days
+        days_left = (subscription.expires_at - datetime.now(timezone.utc)).days
 
         status = (
             AdminUsersHelpersText.STATUS_ACTIVE
