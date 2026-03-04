@@ -109,21 +109,21 @@ async def set_subscription_end(
     return user
 
 
-async def delete_user(
-    session: AsyncSession,
-    username: str,
-) -> bool:
-    """
-    Удаляет пользователя из БД.
-    Возвращает True, если пользователь был найден и удалён.
-    """
-    user = await get_user_by_username(session=session, username=username)
-    if not user:
-        return False
-
-    await session.delete(user)
-    await session.commit()
-    return True
+# async def delete_user(
+#     session: AsyncSession,
+#     username: str,
+# ) -> bool:
+#     """
+#     Удаляет пользователя из БД.
+#     Возвращает True, если пользователь был найден и удалён.
+#     """
+#     user = await get_user_by_username(session=session, username=username)
+#     if not user:
+#         return False
+#
+#     await session.delete(user)
+#     await session.commit()
+#     return True
 
 
 async def render_user(

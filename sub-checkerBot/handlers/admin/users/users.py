@@ -290,37 +290,37 @@ async def handle_new_end_date(
     )
 
 
-@router.callback_query(AdminUserCB.filter(F.action == AdminUserActions.DELETE_USER))
-async def delete_user(
-    query: CallbackQuery,
-    callback_data: AdminUserCB,
-    session: AsyncSession,
-):
-    logger.info("Deleting user %s requested | by %s", callback_data.username, query.from_user.id)
-    username = callback_data.username
-    deleted = await admin_users_service.delete_user(
-        session=session,
-        username=username,
-    )
-    await query.answer()
-
-    if not deleted:
-        await query.message.edit_text(
-            text=AdminUserAction.USER_NOT_FOUND_OR_DELETED,
-            reply_markup=build_admin_main_users_keyboard(),
-        )
-        return
-
-    logger.info("User %s successfully deleted | by %s", callback_data.username, query.from_user.id)
-
-    await render_user(
-        username=username,
-        target=query,
-        is_callback=True,
-        short=True,
-        reply_markup=build_admin_main_users_keyboard(),
-        session=session,
-    )
+# @router.callback_query(AdminUserCB.filter(F.action == AdminUserActions.DELETE_USER))
+# async def delete_user(
+#     query: CallbackQuery,
+#     callback_data: AdminUserCB,
+#     session: AsyncSession,
+# ):
+#     logger.info("Deleting user %s requested | by %s", callback_data.username, query.from_user.id)
+#     username = callback_data.username
+#     deleted = await admin_users_service.delete_user(
+#         session=session,
+#         username=username,
+#     )
+#     await query.answer()
+#
+#     if not deleted:
+#         await query.message.edit_text(
+#             text=AdminUserAction.USER_NOT_FOUND_OR_DELETED,
+#             reply_markup=build_admin_main_users_keyboard(),
+#         )
+#         return
+#
+#     logger.info("User %s successfully deleted | by %s", callback_data.username, query.from_user.id)
+#
+#     await render_user(
+#         username=username,
+#         target=query,
+#         is_callback=True,
+#         short=True,
+#         reply_markup=build_admin_main_users_keyboard(),
+#         session=session,
+#     )
 
 
 @router.callback_query(F.data == AdminUserActions.BACK_TO_USERS_ADMIN_MENU)

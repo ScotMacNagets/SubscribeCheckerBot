@@ -185,6 +185,7 @@ class AdminUsersKeyboard:
     CANCEL_SUB="✂ Отменить подписку"
     DELETE_USER="🗑 Удалить пользователя"
     USERNAME_SEARCH="📂🔍 Поиск по нику"
+    # DELETE_USER="🗑 Удалить пользователя"
 
 #admin_tariffs_keyboard
 

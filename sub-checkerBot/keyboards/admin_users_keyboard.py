@@ -52,13 +52,13 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
             username=username,
         ).pack()
     )
-    builder.button(
-        text=AdminUsersKeyboard.DELETE_USER,
-        callback_data=AdminUserCB(
-            action=AdminUserActions.DELETE_USER,
-            username=username,
-        ).pack()
-    )
+    # builder.button(
+    #     text=AdminUsersKeyboard.DELETE_USER,
+    #     callback_data=AdminUserCB(
+    #         action=AdminUserActions.DELETE_USER,
+    #         username=username,
+    #     ).pack()
+    # )
     builder.button(
         text=GeneralButtons.BACK_BUTTON,
         callback_data=AdminUserActions.BACK_TO_USERS_ADMIN_MENU,
