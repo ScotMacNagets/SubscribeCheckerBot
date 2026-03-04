@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    env_file:
+      - .env.dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      pg:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./sub-checkerBot
+          target: /app
+        - action: rebuild
+          path: ./poetry.lock
+
+  pg:
+    image: postgres:16.12
+    env_file:
+      - .env.dev
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis:
+    image: redis:7.4
+    container_name: redis
+    env_file:
+      - .env.dev
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+volumes:
+  pgdata:
+
+
