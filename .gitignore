@@ -149,8 +149,8 @@ activemq-data/
 
 # Environments
 .env.dev
-sub-checkerBot/.env.local
 .envrc
+.env
 .venv
 env/
 venv/
