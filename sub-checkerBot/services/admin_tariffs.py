@@ -2,9 +2,11 @@ import logging
 
 from aiogram.types import CallbackQuery
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_tariff_callbackdata import AdminTariffCB
+from core.exceptions import TariffAlreadyExistsError
 from core.models import Tariff
 from core.text import AdminTariffMenu
 from keyboards.admin_tariffs_keyboard import build_admin_tariffs_list_keyboard
@@ -130,6 +132,16 @@ async def create_tariff(
         payload=payload
     )
     session.add(tariff)
-    await session.commit()
-    await session.refresh(tariff)
-    return tariff
+    try:
+        await session.commit()
+        await session.refresh(tariff)
+        return tariff
+
+    except IntegrityError as error:
+        await session.rollback()
+
+        if "tariffs_payload_key" in str(error):
+            logger.error("Tariff payload key already exists")
+            raise TariffAlreadyExistsError()
+
+        raise
