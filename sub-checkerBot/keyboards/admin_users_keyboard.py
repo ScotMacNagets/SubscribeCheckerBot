@@ -29,15 +29,15 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
     Клавиатура действий над конкретным пользователем.
     """
     builder = InlineKeyboardBuilder()
-    for days in (7, 30, 90):
-        builder.button(
-            text=AdminUsersKeyboard.EXTEND_DAYS.format(days=days),
-            callback_data=AdminUserCB(
-                action=AdminUserActions.EXTEND,
-                username=username,
-                days=days,
-            ).pack()
-        )
+    # for days in (7, 30, 90):
+    #     builder.button(
+    #         text=AdminUsersKeyboard.EXTEND_DAYS.format(days=days),
+    #         callback_data=AdminUserCB(
+    #             action=AdminUserActions.EXTEND,
+    #             username=username,
+    #             days=days,
+    #         ).pack()
+    #     )
     builder.button(
         text=AdminUsersKeyboard.SET_THE_DATE,
         callback_data=AdminUserCB(
@@ -63,6 +63,6 @@ def build_user_actions_keyboard(username: str) -> InlineKeyboardMarkup:
         text=GeneralButtons.BACK_BUTTON,
         callback_data=AdminUserActions.BACK_TO_USERS_ADMIN_MENU,
     )
-    builder.adjust(3, 2, 1)
+    builder.adjust(1)
     return builder.as_markup()
 
