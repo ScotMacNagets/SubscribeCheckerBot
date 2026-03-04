@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_callback_text import AdminTariffsActions
+from core.exceptions import TariffAlreadyExistsError
 from core.text import AdminAllTariffText, AdminTariffKeyboard
 from handlers.admin.tariffs.fsm_states import CreateTariff
 from keyboards.admin_tariffs_keyboard import create_tariff_confirmation_keyboard, back_to_admin_menu_keyboard
@@ -97,12 +98,25 @@ async def confirmed_tariff(
             session=session,
             data=data,
         )
+    except TariffAlreadyExistsError:
+        logger.error("User creation error, tariff already exists")
+        await query.message.edit_text(
+            text=AdminAllTariffText.TARIFF_ALREADY_EXISTS,
+            reply_markup=back_to_admin_menu_keyboard(),
+        )
+        await query.answer()
+        return
     except ValueError as error:
         logger.error(
-            "Ошибка при создании пользователя: %s",
+            "User creation error: %s",
             error
         )
-        await query.message.edit_text(AdminAllTariffText.CREATING_ERROR)
+        await query.message.edit_text(
+            text=AdminAllTariffText.CREATING_ERROR,
+            reply_markup=back_to_admin_menu_keyboard(),
+        )
+        await query.answer()
+        return
 
 
     await query.message.edit_text(

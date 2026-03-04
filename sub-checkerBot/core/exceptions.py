@@ -1,0 +1,4 @@
+
+
+class TariffAlreadyExistsError(Exception):
+    pass
