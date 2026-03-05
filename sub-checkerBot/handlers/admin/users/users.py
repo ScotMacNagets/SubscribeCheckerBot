@@ -8,6 +8,8 @@ from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from callbacks.admin_user_callbackdata import AdminUserCB
+from core.bot_instance import bot
+from core.config import settings
 from core.text import AdminUsersMenu, AdminUserAction
 from handlers.admin.helpers import open_admin_menu_helper
 from services.admin_users import render_user
@@ -176,6 +178,20 @@ async def cancel_subscription(
 
     logger.info(
         "User subscription cancelled successfully for %s | by %s",
+        callback_data.username,
+        query.from_user.id,
+    )
+
+    await bot.ban_chat_member(
+        chat_id=settings.channel.chan_id,
+        user_id=user.id,
+    )
+    await query.answer(
+        text=AdminUserAction.SUCCESSFULLY_CANCELED,
+    )
+
+    logger.info(
+        "User %s has been deleted from the channel | by %s",
         callback_data.username,
         query.from_user.id,
     )
