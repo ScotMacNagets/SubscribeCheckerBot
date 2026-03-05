@@ -14,6 +14,21 @@ Telegram-бот для продажи подписки в закрытые Teleg
 - ⚙️ Управлять тарифами и пользователями через админ-панель
 
 ---
+### 🖼 Скриншоты
+
+![picture_1](./screens/first_screen.png "Покупка подписки")
+- Покупка подписки
+
+![picture_2](./screens/screen_2.png "Меню администратора")
+- Меню администратора
+
+![picture_3](./screens/screen_3.png "Отображение пользователя")
+- Отображение пользователя
+
+![picture_4](./screens/screen_4.png "Управление тарифом")
+- Управление тарифом
+
+---
 
 ### 🎯 Для кого
 
@@ -84,15 +99,9 @@ git clone https://github.com/your-username/sub-checker-bot.git
 cd sub-checker-bot
 ```
 
-#### 2️⃣ Установка зависимостей
+#### 2️⃣ Настройка переменных окружения
 
-```bash
-poetry install
-```
-
-#### 3️⃣ Настройка переменных окружения
-
-Создайте файл .env в корне проекта и заполните следующие поля:
+На основе файла env.dev.example в корне проекта создайте файл .env.dev и заполните следующие поля:
 ```bash
 SUBSCRIBE__RUN__TOKEN=bot_token
 SUBSCRIBE__CHANNEL__CHAN_ID=channel_id
@@ -103,6 +112,21 @@ SUBSCRIBE__PAYMENT__TOKEN=payment_token
 SUBSCRIBE__ADMIN__SUPPORT=admin_support_nickname
 SUBSCRIBE__ADMIN__SUPER_USER=superser_nickname
 ```
+
+#### 3️⃣ Запуск через докер
+
+Введите в терминал следующие команды по очереди
+```bash
+docker compose --env-file .env.dev build
+
+docker compose --env-file .env.dev up -d
+```
+
+Для просмотра логов бота
+```bash
+docker compose --env-file .env.dev logs -f app
+```
+
 
 ### 📜 Лицензирование
 Проект распространяется на условиях лицензии [MIT](LICENSE.txt)
