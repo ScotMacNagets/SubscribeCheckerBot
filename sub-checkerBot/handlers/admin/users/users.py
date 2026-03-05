@@ -60,10 +60,9 @@ async def handle_user_search_by_id(
     if not user:
         await message.answer(
             text=AdminUserAction.USER_NOT_FOUND,
+            reply_markup=build_admin_main_users_keyboard(),
         )
-        await back_to_users_admin_menu(
-            message=message,
-        )
+
         logger.info("User %s not found | by %s", username, message.from_user.id)
         return
 
@@ -118,7 +117,7 @@ async def extend_sub_for_user(
         )
         await query.message.edit_text(
             text=AdminUserAction.FAILED_TO_EXTEND_SUB,
-            reply_markup=build_admin_main_users_keyboard()
+            reply_markup=build_admin_main_users_keyboard(),
         )
         await query.answer()
         return
@@ -352,8 +351,10 @@ async def handle_new_end_date(
 
 
 @router.callback_query(F.data == AdminUserActions.BACK_TO_USERS_ADMIN_MENU)
-async def back_to_users_admin_menu(message: Message):
-    await message.answer(
+async def back_to_users_admin_menu(
+        query: CallbackQuery,
+):
+    await query.message.edit_text(
         text=AdminUsersMenu.USER_MANAGE_MENU,
         reply_markup=build_admin_main_users_keyboard(),
     )

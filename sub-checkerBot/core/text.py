@@ -89,6 +89,7 @@ class AdminUserAction:
         "Например: 25.12.2026\n"
     )
     USER_NOT_FOUND_OR_DELETED= "Пользователь не найден или уже удалён."
+    SUCCESSFULLY_CANCELED="Пользователь был успешно удален из группы"
 
 
 class AdminUsersHelpersText:
